@@ -10,6 +10,7 @@ import Controls from "./pages/Controls";
 import Products from "./pages/Products";
 import StockManagement from "./pages/StockManagement";
 import Users from "./pages/Users";
+import Parameters from "./pages/Parameters";
 
 const unAuthRoutes = [
   {

@@ -1,11 +1,12 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
+import SidBar from "../components/SidBar";
 
 const Layout = () => {
   return (
     <div className="flex">
       
-      <h1>Hello</h1>
+      <SidBar/>
         <Outlet />
     
     </div>
