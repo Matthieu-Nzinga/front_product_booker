@@ -1,11 +1,8 @@
 import React from "react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { MdOutlineDashboard } from "react-icons/md";
 import { IoSettingsOutline } from "react-icons/io5";
 import { IoHelpBuoyOutline } from "react-icons/io5";
-import { useDispatch } from "react-redux";
-import { removeToken } from "../features/authUtils";
-import { removeTokenAction } from "../features/auth/authSlice";
 import { GiCardboardBoxClosed } from "react-icons/gi";
 import { LuShoppingCart } from "react-icons/lu";
 import { GiCardboardBox } from "react-icons/gi";
@@ -16,14 +13,7 @@ import { LuUsers2 } from "react-icons/lu";
 
 
 const SidBar = () => {
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-
-  const handleLogout = () => {
-    removeToken();
-    dispatch(removeTokenAction());
-    navigate("/");
-  };
+ 
 
   return (
     <div className="w-[25%]">

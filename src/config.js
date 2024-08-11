@@ -2,3 +2,5 @@
 export const API_URL = 'https://product-booker.onrender.com/api/'
 
 export const LOGIN = API_URL + 'user/login'
+export const PRODUCTS = API_URL + 'products'
+export const POST_PRODUCTS = API_URL + 'products'

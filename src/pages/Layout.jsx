@@ -5,10 +5,10 @@ import SidBar from "../components/SidBar";
 const Layout = () => {
   return (
     <div className="flex">
-      
-      <SidBar/>
+      <SidBar />
+      <div className="w-full">
         <Outlet />
-    
+      </div>
     </div>
   );
 };
