@@ -9,6 +9,10 @@ export default {
       backgroundImage: {
         'custom-gradient': 'linear-gradient(90deg, #E0EAFF 0%, #F3E0FF 100%)',
       },
+      colors: {
+        customBlue: '#316CEA',
+        customGray: '#6B6B6B',
+      },
     },
   },
   plugins: [],
