@@ -64,11 +64,11 @@ const LoginForm = () => {
         <input
           type="text"
           {...register("contact", { 
-            required: "L'e-mail ou le numéro de téléphone est requis.",
+            required: "L'e-mail est requis.",
             validate: validateEmailOrPhone
           })}
           className="border rounded-xl outline-none px-4 py-2 w-full"
-          placeholder="Email/Telephone"
+          placeholder="Email"
         />
         {errors.contact && <p className="text-red-700">{errors.contact.message}</p>}
 

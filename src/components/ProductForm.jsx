@@ -49,7 +49,7 @@ const ProductForm = ({ onClose }) => {
   const handleFormSubmit = async (data) => {
     const formDataWithImage = {
       ...data,
-      urlphotoproduit: imageUrl, // Assure-toi que le nom de la clé est correct
+      urlphotoproduit: imageUrl, 
     };
 
     try {
@@ -57,7 +57,7 @@ const ProductForm = ({ onClose }) => {
       
       toast.success("Produit ajouté avec succès");
       dispatch(getAllProduits()); 
-      if (onClose) onClose(); // Ferme le modal si onClose est fourni
+      if (onClose) onClose(); 
     } catch (error) {
       toast.error("Échec de la création du produit");
     }
