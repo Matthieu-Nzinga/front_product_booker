@@ -1,8 +1,11 @@
 import React from 'react'
+import Header from '../components/Header'
 
 const StockManagement = () => {
   return (
-    <div>StockManagement</div>
+    <div>
+      <Header text={"Gestion des Stocks"}/>
+    </div>
   )
 }
 

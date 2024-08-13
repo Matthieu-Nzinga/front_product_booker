@@ -1,8 +1,11 @@
 import React from 'react'
+import Header from '../components/Header'
 
 const Parameters = () => {
   return (
-    <div>Parameters</div>
+    <div>
+      <Header text={"Parametres"}/>
+    </div>
   )
 }
 
