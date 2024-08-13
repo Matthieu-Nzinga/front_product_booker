@@ -70,7 +70,7 @@ const NavBar = () => {
                 onClick={handleLogout} 
                 className="block px-4 py-2 w-full text-left hover:bg-gray-100"
               >
-                Logout
+                Se déconnecter
               </button>
             </div>
           )}
