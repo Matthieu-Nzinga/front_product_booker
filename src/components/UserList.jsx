@@ -45,7 +45,7 @@ const UserList = () => {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
   return (
-    <div className="px-8 mt-28 flex flex-col gap-5 md:ml-0 ml-[-19%] pr-[20%] sm:pr-9">
+    <div className="px-8 mt-28 flex flex-col gap-5 md:ml-0 ">
        <ToastContainer />
       <h2 className='font-black text-3xl block md:hidden'>Les utilisateur</h2>
       <Table columns={columns} rows={rows} isMobile={isMobile}/>

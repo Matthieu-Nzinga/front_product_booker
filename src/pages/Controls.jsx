@@ -1,8 +1,11 @@
 import React from 'react'
+import Header from '../components/Header'
 
 const Controls = () => {
   return (
-    <div>Controls</div>
+    <div>
+      <Header text={"Les Commandes"}/>
+    </div>
   )
 }
 
