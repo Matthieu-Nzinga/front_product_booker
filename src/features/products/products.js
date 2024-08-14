@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { API_URL, POST_PRODUCTS, PRODUCTS, } from "../../config";
+import { API_URL, GET_CATEGORIES, POST_PRODUCTS, PRODUCTS, } from "../../config";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 
@@ -44,18 +44,34 @@ export const getAllProduits = createAsyncThunk(
 export const postProduit = createAsyncThunk(
   "post/postProduit",
   async (data, thunkApi) => {
+    console.log(data)
     try {
       const response = await api.post(POST_PRODUCTS, data);
+
       return response.data;
     } catch (error) {
-    
+      console.log(error)
       return thunkApi.rejectWithValue(error);
     }
   }
 );
 
+export const getAllCategories = createAsyncThunk(
+  "get/getAllcategories",
+    async () => {
+       try {
+          const response = await api.get(GET_CATEGORIES)
+         
+          return response.data;
+       } catch (error) {
+        
+       }
+    }
+)
+
 const initialState = {
   product: [],
+  categories: [],
   error: null,
 };
 
@@ -82,7 +98,18 @@ const products = createSlice({
       .addCase(postProduit.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.error.message;
-      });
+      })
+      .addCase(getAllCategories.pending, (state) => {
+        state.status = 'loading';
+      })
+      .addCase(getAllCategories.fulfilled, (state, action) => {
+        state.categories = action.payload;
+        state.error = null; 
+      })
+      .addCase(getAllCategories.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.error.message;
+      })
   },
 });
 
