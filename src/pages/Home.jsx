@@ -19,7 +19,11 @@ const Home = () => {
       <div className="flex flex-wrap justify-between">
         {product.map((item, key) => (
           <div key={key} className="w-full sm:w-[48%] md:w-[32%] mb-5">
-            <Card image={item.urlphotoproduit} title={item.nom_produit} price={item.prix_par_unite} />
+            <Card 
+              images={item.urlsPhotos} 
+              title={item.nom_produit} 
+              price={item.prix_par_unite} 
+            />
           </div>
         ))}
       </div>

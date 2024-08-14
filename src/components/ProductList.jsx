@@ -3,7 +3,7 @@ import { Modal, Box, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import ProductForm from "./ProductForm";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllProduits, postProduit } from "../features/products/products";
+import { getAllCategories, getAllProduits } from "../features/products/products";
 import { toast, ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import Table from "./Table";
@@ -17,19 +17,21 @@ const columns = (isMobile) => [
 ];
 
 const ProductList = () => {
-  const { product } = useSelector((state) => state.products);
+  const { product, categories } = useSelector((state) => state.products);
   const dispatch = useDispatch();
 
   useEffect(() => {
     dispatch(getAllProduits());
-  }, [dispatch]);
+    dispatch(getAllCategories());
+  }, []);
 
+  
   const rows = product.map((p, index) => ({
-    id: p.id || `row-${index + 1}`,
+    id: p?.id || `row-${index + 1}`,
     autoId: index + 1,
-    name: p.nom_produit,
-    price: p.prix_par_unite ? `${parseFloat(p.prix_par_unite).toFixed(2)} €` : "Non spécifié",
-    quantity: p.quantite_en_stock || 0,
+    name: p?.nom_produit,
+    price: p?.prix_par_unite ? `${parseFloat(p.prix_par_unite).toFixed(2)} €` : "Non spécifié",
+    quantity: p?.quantite_en_stock || 0,
   }));
 
   const [open, setOpen] = useState(false);
@@ -40,9 +42,9 @@ const ProductList = () => {
 
   return (
     <div className="px-8 mt-28 flex flex-col gap-5  sm:pr-9">
-       <ToastContainer />
+      <ToastContainer />
       <h2 className='font-black text-3xl block md:hidden'>Les produits</h2>
-      <Table columns={columns} rows={rows} isMobile={isMobile}/>
+      <Table columns={columns} rows={rows} isMobile={isMobile} />
       <div className="flex justify-end">
         <button
           className="text-center font-semibold text-base bg-customBlue px-[93px] text-white py-2 rounded"
@@ -59,7 +61,7 @@ const ProductList = () => {
               <CloseIcon />
             </IconButton>
           </div>
-          <ProductForm onClose={handleClose} />
+          <ProductForm onClose={handleClose} category={categories} />
         </Box>
       </Modal>
     </div>
