@@ -1,60 +1,57 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Box, Button, TextField, IconButton } from "@mui/material";
+import { Box, Button, TextField, IconButton, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import { ToastContainer, toast } from "react-toastify";
 import { useDispatch } from "react-redux";
-import { getAllProduits, postProduit } from "../features/products/products"; // Assure-toi que le chemin est correct
+import { postProduit, getAllProduits } from "../features/products/products"; 
 
-const ProductForm = ({ onClose }) => {
+const ProductForm = ({ onClose, category }) => {
+  const [imageUrls, setImageUrls] = useState([]);
   const [selectedFileName, setSelectedFileName] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
   const dispatch = useDispatch();
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm();
+  const { register, handleSubmit, formState: { errors }, setValue } = useForm();
 
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
-    if (file) {
-      setSelectedFileName(file.name);
+    if (!file) return;
 
-      // Upload the image to Cloudinary
+    if (imageUrls.length >= 5) {
+      toast.error("Vous ne pouvez télécharger que jusqu'à 5 images.");
+      return;
+    }
+
+    setSelectedFileName(file.name);
+
+    try {
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('upload_preset', 'myImage'); // Assure-toi que 'myImage' est bien ton preset
+      formData.append('upload_preset', 'myImage');
 
-      try {
-        const response = await fetch(
-          'https://api.cloudinary.com/v1_1/deuutxkyz/image/upload',
-          {
-            method: 'POST',
-            body: formData,
-          }
-        );
+      const response = await fetch(
+        'https://api.cloudinary.com/v1_1/deuutxkyz/image/upload',
+        {
+          method: 'POST',
+          body: formData,
+        }
+      );
 
-        const cloudinaryData = await response.json();
-        setImageUrl(cloudinaryData.secure_url);
-      } catch (error) {
-        console.error("Erreur lors du téléchargement de l'image :", error);
-      }
-    } else {
+      const cloudinaryData = await response.json();
+      setImageUrls(prevUrls => [...prevUrls, cloudinaryData.secure_url]);
       setSelectedFileName('');
-      setImageUrl('');
+    } catch (error) {
+      console.error("Erreur lors du téléchargement de l'image :", error);
     }
   };
 
   const handleFormSubmit = async (data) => {
-    const formDataWithImage = {
+    const formDataWithImages = {
       ...data,
-      urlphotoproduit: imageUrl, 
+      urlsPhotos: imageUrls, 
     };
 
     try {
-      await dispatch(postProduit(formDataWithImage)).unwrap();
-      
+      await dispatch(postProduit(formDataWithImages)).unwrap();
       toast.success("Produit ajouté avec succès");
       dispatch(getAllProduits()); 
       if (onClose) onClose(); 
@@ -67,7 +64,14 @@ const ProductForm = ({ onClose }) => {
     <Box
       component="form"
       onSubmit={handleSubmit(handleFormSubmit)}
-      sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+      sx={{ 
+        display: "flex", 
+        flexDirection: "column", 
+        gap: 2,
+        maxHeight: '80vh',
+        overflowY: 'auto',
+        padding: '16px'
+      }}
     >
       <TextField
         label="Nom"
@@ -76,31 +80,66 @@ const ProductForm = ({ onClose }) => {
         helperText={errors.nom_produit?.message}
         fullWidth
       />
+      
+      <FormControl fullWidth>
+        <InputLabel id="category-label">Type de produit</InputLabel>
+        <Select
+          labelId="category-label"
+          label="Type de produit"
+          {...register("categoryId", { required: "Catégorie est requise" })}
+          defaultValue=""
+        >
+          {category?.map((cat) => (
+            <MenuItem key={cat?.id} value={cat?.id}>
+              {cat?.nom}
+            </MenuItem>
+          ))}
+        </Select>
+        {errors.categorie_id && <p className="text-red-700">{errors.categorie_id.message}</p>}
+      </FormControl>
+
       <Box
         sx={{
           display: "flex",
-          alignItems: "center",
+          flexDirection: "column",
+          gap: 2,
           border: "1px solid #ccc",
           borderRadius: "4px",
           padding: "8px",
           width: "100%",
         }}
       >
-        <span style={{ flexGrow: 1 }}>
-          {selectedFileName || "Image (.png)"}
+        <span>
+          {selectedFileName || "Aucune image sélectionnée"}
         </span>
         <IconButton component="label">
           <input
             type="file"
-            {...register("image", { required: "Image est requise" })}
             accept="image/png"
             hidden
             onChange={handleFileChange}
           />
           <PhotoCameraIcon />
         </IconButton>
+        <Button
+          type="button"
+          onClick={() => document.querySelector('input[type="file"]').click()}
+          variant="outlined"
+        >
+          Ajouter une autre image
+        </Button>
+
+        <Box sx={{ display: "flex", flexDirection: "row", gap: 1, flexWrap: "wrap" }}>
+          {imageUrls.map((url, index) => (
+            <img
+              key={index}
+              src={url}
+              alt={`Preview ${index}`}
+              style={{ width: "100px", height: "100px", objectFit: "cover", borderRadius: "4px" }}
+            />
+          ))}
+        </Box>
       </Box>
-      {errors.image && <p className="text-red-700">{errors.image.message}</p>}
       
       <TextField
         label="Prix"
@@ -111,7 +150,7 @@ const ProductForm = ({ onClose }) => {
             const parsedValue = parseFloat(value);
             return !isNaN(parsedValue) || "Le prix doit être un nombre décimal valide";
           },
-          setValueAs: (value) => parseFloat(value) // Convertit la valeur en float avant de la stocker
+          setValueAs: (value) => parseFloat(value)
         })}
         error={!!errors.prix_par_unite}
         helperText={errors.prix_par_unite ? errors.prix_par_unite.message : ""}
@@ -141,9 +180,15 @@ const ProductForm = ({ onClose }) => {
         multiline
         rows={3}
       />
-      <Button type="submit" variant="contained" color="primary">
-        AJOUTER LE PRODUIT
-      </Button>
+
+      <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+        <Button type="submit" variant="contained" color="primary">
+          AJOUTER LE PRODUIT
+        </Button>
+        <Button type="button" onClick={onClose} variant="outlined">
+          Fermer
+        </Button>
+      </Box>
     </Box>
   );
 };

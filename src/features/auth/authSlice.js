@@ -6,12 +6,14 @@ import { LOGIN } from '../../config';
 export const userLogin = createAsyncThunk(
   'auth/userLogin',
   async (data, thunkApi) => {
+  
     try {
       const response = await axios.post(LOGIN, data);
       // Stockez le token dans le localStorage
       localStorage.setItem('token', response.data.token);
       return response.data;
     } catch (error) {
+     
       return thunkApi.rejectWithValue(error.response.data);
     }
   }
