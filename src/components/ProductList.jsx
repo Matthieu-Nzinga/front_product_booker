@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Modal, Box, IconButton, Tooltip, Grid, Typography } from "@mui/material";
+import { Modal, Box, IconButton, Grid, Typography, Button } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import ProductForm from "./ProductForm";
@@ -19,11 +19,9 @@ const columns = (isMobile, handleViewDetails) => [
     headerName: "Actions",
     width: isMobile ? 100 : 200,
     renderCell: (params) => (
-      <Tooltip title="Détails sur le produit">
-        <IconButton onClick={() => handleViewDetails(params.row)}>
-          <VisibilityIcon />
-        </IconButton>
-      </Tooltip>
+      <IconButton onClick={() => handleViewDetails(params.row)}>
+        <VisibilityIcon />
+      </IconButton>
     ),
   },
 ];
@@ -34,6 +32,7 @@ const ProductList = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [open, setOpen] = useState(false);
   const [viewDetailsOpen, setViewDetailsOpen] = useState(false);
+  const [activePhotoIndex, setActivePhotoIndex] = useState(0);
   const isMobile = useMediaQuery('(max-width: 640px)');
   const isTablet = useMediaQuery('(max-width: 768px)');
 
@@ -56,6 +55,7 @@ const ProductList = () => {
 
   const handleViewDetails = (product) => {
     setSelectedProduct(product);
+    setActivePhotoIndex(0); // Affiche la première photo par défaut
     setViewDetailsOpen(true);
   };
 
@@ -94,39 +94,52 @@ const ProductList = () => {
       </Modal>
 
       <Modal open={viewDetailsOpen} onClose={handleViewDetailsClose}>
-  <Box
-    className={`absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%] bg-white p-4 rounded-lg`}
-    sx={{
-      width: isMobile ? '90vw' : '400px',
-      maxHeight: isMobile ? '80vh' : '80vh', // Limiter la hauteur pour le scroll
-      overflowY: 'auto', // Activer le défilement vertical
-    }}
-  >
-    <div className="flex justify-end">
-      <IconButton onClick={handleViewDetailsClose}>
-        <CloseIcon />
-      </IconButton>
-    </div>
-    {selectedProduct && (
-      <div>
-        <h2 className="text-2xl font-semibold">{selectedProduct.name}</h2>
-        <p className="text-lg font-medium">Prix: {selectedProduct.price}</p>
-        <p className="text-lg font-medium">Stock: {selectedProduct.quantity}</p>
-        <div className="grid grid-cols-2 gap-2 mt-4">
-          {selectedProduct.urlsPhotos.map((url, index) => (
-            <img
-              key={index}
-              src={url}
-              alt={`product-${index}`}
-              className="w-full h-auto object-cover rounded"
-            />
-          ))}
-        </div>
-      </div>
-    )}
-  </Box>
-</Modal>
-
+        <Box
+          className={`absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%] bg-white p-4 rounded-lg`}
+          sx={{
+            width: isMobile ? '90vw' : '400px',
+            maxHeight: isMobile ? '80vh' : '80vh', // Limiter la hauteur pour le scroll
+            overflowY: 'auto', // Activer le défilement vertical
+          }}
+        >
+          <div className="flex justify-end">
+            <IconButton onClick={handleViewDetailsClose}>
+              <CloseIcon />
+            </IconButton>
+          </div>
+          {selectedProduct && (
+            <div>
+              <Typography variant="h6" className="text-2xl font-semibold">
+                {selectedProduct.name}
+              </Typography>
+              <Typography variant="subtitle1" className="text-lg font-medium">
+                Prix: {selectedProduct.price}
+              </Typography>
+              <Typography variant="subtitle1" className="text-lg font-medium">
+                Stock: {selectedProduct.quantity}
+              </Typography>
+              <div className="flex gap-2 overflow-x-auto mt-4">
+                {selectedProduct.urlsPhotos.map((_, index) => (
+                  <Button
+                    key={index}
+                    onClick={() => setActivePhotoIndex(index)}
+                    variant={activePhotoIndex === index ? "contained" : "outlined"}
+                  >
+                    Photo {index + 1}
+                  </Button>
+                ))}
+              </div>
+              <div className="mt-4">
+                <img
+                  src={selectedProduct.urlsPhotos[activePhotoIndex]}
+                  alt={`product-${activePhotoIndex}`}
+                  className="w-full h-auto object-cover rounded"
+                />
+              </div>
+            </div>
+          )}
+        </Box>
+      </Modal>
     </div>
   );
 };
