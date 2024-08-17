@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import  { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllProduits } from "../features/products/products";
 import Card from "../components/Card";
@@ -22,7 +22,7 @@ const Home = () => {
             <Card 
               images={item.urlsPhotos} 
               title={item.nom_produit} 
-              price={item.prix_par_unite} 
+              id={item.id} 
             />
           </div>
         ))}
