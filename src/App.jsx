@@ -19,6 +19,7 @@ import Home from "./pages/Home";
 import Basket from "./pages/Basket";
 import MyReservations from "./pages/MyReservations";
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
+import DetailsProduct from "./pages/DetailsProduct";
 
 
 const unAuthRoutes = [
@@ -77,6 +78,10 @@ const clientRoutes = [
       {
         path: "panier",
         element: <Basket />,
+      },
+      {
+        path: "product/:id", // Ajout de la route pour afficher les détails d'un produit
+        element: <DetailsProduct />,
       },
     ],
   },
