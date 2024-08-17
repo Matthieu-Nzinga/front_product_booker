@@ -40,7 +40,6 @@ const ProductList = () => {
     dispatch(getAllProduits());
     dispatch(getAllCategories());
   }, [dispatch]);
-
   const rows = product.map((p, index) => ({
     id: p?.id || `row-${index + 1}`,
     autoId: index + 1,
