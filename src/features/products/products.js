@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { API_URL, GET_CATEGORIES, GET_COMMANDS, POST_COMMANDS, POST_PRODUCTS, PRODUCTS, PUT_COMMANDS, } from "../../config";
+import { API_URL, GET_CATEGORIES, GET_COMMANDS, HIDE_PRODUCT, POST_COMMANDS, POST_PRODUCTS, PRODUCTS, PUT_COMMANDS, } from "../../config";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 
@@ -102,7 +102,18 @@ export const putCommand = createAsyncThunk(
             const response = await api.put(PUT_COMMANDS + idCommand)
            return response.data.commande;
            } catch (error) {
-            console.log(error);
+              return thunkApi.rejectWithValue(error);
+           }
+  }
+)
+export const hideProduct = createAsyncThunk(
+  "put/hideProduct",
+  async (idProduit, thunkApi) => {
+    
+           try {
+           const response = await api.put(HIDE_PRODUCT + idProduit)
+           return response.data.produit;
+           } catch (error) {
               return thunkApi.rejectWithValue(error);
            }
   }
@@ -181,6 +192,19 @@ const products = createSlice({
         }
       })
       .addCase(putCommand.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.error.message;
+      })
+      .addCase(hideProduct.pending, (state) => {
+        state.status = 'loading';
+      })
+      .addCase(hideProduct.fulfilled, (state, action) => {
+        const index = state.product.findIndex(order => order.id === action.payload.id);
+        if (index !== -1) {
+          state.product[index].status = action.payload.statut;
+        }
+      })
+      .addCase(hideProduct.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.error.message;
       })
