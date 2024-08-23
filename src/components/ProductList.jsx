@@ -139,7 +139,7 @@ const ProductList = () => {
 
   // Filtrer les produits en fonction du terme de recherche
   const filteredProducts = sortedProducts.filter((product) =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase())
+    product?.name?.toLowerCase().includes(searchTerm?.toLowerCase())
   );
 
   const handleOpen = () => setOpen(true);
@@ -273,6 +273,7 @@ const ProductList = () => {
             <ProductEditForm
               product={editProduct}
               onClose={handleEditModalClose}
+              category={categories}
             />
           )}
         </Box>
