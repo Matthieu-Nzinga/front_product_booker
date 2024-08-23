@@ -9,17 +9,15 @@ const Login = () => {
         <h2 className='font-black text-2xl text-customBlue'>LOGO</h2>
         <div className='flex flex-col justify-center items-center gap-5'>
           <h1 className='font-black text-5xl text-center'>
-            <span className='text-customBlue'>Réservez</span> vos{' '}
-            <span className='text-customBlue'>Produits</span> en toute sécurité
+           <span className='text-customBlue'>
+            TRADING EXPRESSIONS DISTRIBUTION
+           </span>
           </h1>
-          <p className="text-customGray font-normal text-base text-center">
-            Choisissez vos produits, réservez, puis faites-vous livrer de la plus simple des manières !
-          </p>
-          <img 
-            src="/photo.svg" 
-            alt="image" 
-            className='mt-3 max-h-[45vh] object-cover' 
-          />
+          <h1 className='font-semibold text-5xl text-center'>
+           <span>
+            Réservez vos produits en toute sécurité
+           </span>
+          </h1>
         </div>
       </div>
       
