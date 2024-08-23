@@ -1,24 +1,52 @@
 import React, { useEffect, useState } from "react";
-import { Modal, Box, IconButton, Typography, Button, Tooltip } from "@mui/material";
+import {
+  Modal,
+  Box,
+  IconButton,
+  Typography,
+  Button,
+  Tooltip,
+  TextField,
+} from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import DisabledByDefaultIcon from "@mui/icons-material/DisabledByDefault";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline"; // Nouvelle icône
+import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
 import EditIcon from "@mui/icons-material/Edit";
 import ProductForm from "./ProductForm";
 import ProductEditForm from "./ProductEditForm";
 import { useDispatch, useSelector } from "react-redux";
-import { activateProduct, getAllCategories, getAllCommands, getAllProduits, hideProduct } from "../features/products/products";
+import {
+  activateProduct,
+  getAllCategories,
+  getAllCommands,
+  getAllProduits,
+  hideProduct,
+} from "../features/products/products";
 import { toast, ToastContainer } from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
+import "react-toastify/dist/ReactToastify.css";
 import Table from "./Table";
-import { useMediaQuery } from '@mui/material';
+import { useMediaQuery } from "@mui/material";
 
-const columns = (isMobile, handleViewDetails, handleDisableProduct, handleActivateProduct, handleEditProduct) => [
+const columns = (
+  isMobile,
+  handleViewDetails,
+  handleDisableProduct,
+  handleActivateProduct,
+  handleEditProduct
+) => [
   { field: "name", headerName: "Nom", width: isMobile ? 100 : 300 },
   { field: "price", headerName: "Prix", width: isMobile ? 100 : 300 },
-  { field: "quantity", headerName: "Stock disponible", width: isMobile ? 100 : 300 },
-  { field: "orderedQuantity", headerName: "Quantité commandée", width: isMobile ? 100 : 300 },
+  {
+    field: "quantity",
+    headerName: "Stock disponible",
+    width: isMobile ? 100 : 300,
+  },
+  {
+    field: "orderedQuantity",
+    headerName: "Quantité commandée",
+    width: isMobile ? 100 : 300,
+  },
   {
     field: "visualisation",
     headerName: "Visualiser",
@@ -50,7 +78,7 @@ const columns = (isMobile, handleViewDetails, handleDisableProduct, handleActiva
               onClick={() => handleActivateProduct(params.row.id)}
               color="success"
             >
-              <AddCircleOutlineIcon />
+              <CheckCircleOutlineOutlinedIcon />
             </IconButton>
           </Tooltip>
         )}
@@ -60,16 +88,19 @@ const columns = (isMobile, handleViewDetails, handleDisableProduct, handleActiva
 ];
 
 const ProductList = () => {
-  const { product, categories, commands } = useSelector((state) => state.products);
+  const { product, categories, commands } = useSelector(
+    (state) => state.products
+  );
   const dispatch = useDispatch();
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [open, setOpen] = useState(false);
   const [viewDetailsOpen, setViewDetailsOpen] = useState(false);
-  const [editOpen, setEditOpen] = useState(false); // Ajout de l'état pour le modal d'édition
+  const [editOpen, setEditOpen] = useState(false);
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
   const [editProduct, setEditProduct] = useState(null);
-  const isMobile = useMediaQuery('(max-width: 640px)');
-  const isTablet = useMediaQuery('(max-width: 768px)');
+  const [searchTerm, setSearchTerm] = useState(""); // État pour le terme de recherche
+  const isMobile = useMediaQuery("(max-width: 640px)");
+  const isTablet = useMediaQuery("(max-width: 768px)");
 
   useEffect(() => {
     dispatch(getAllProduits());
@@ -79,33 +110,44 @@ const ProductList = () => {
 
   const calculateOrderedQuantity = (productId) => {
     return commands.reduce((total, command) => {
-      if (command.status === 'En attente') {
-        const reservedProduct = command.reservations.find(reservation => reservation.produitId === productId);
-        return total + (reservedProduct ? reservedProduct.quantite_commande : 0);
+      if (command.status === "En attente") {
+        const reservedProduct = command.reservations.find(
+          (reservation) => reservation.produitId === productId
+        );
+        return (
+          total + (reservedProduct ? reservedProduct.quantite_commande : 0)
+        );
       }
       return total;
     }, 0);
   };
 
   const sortedProducts = [...product]
-    .sort((a, b) => b.statut - a.statut) // Les produits avec statut true viennent en premier
+    .sort((a, b) => b.statut - a.statut)
     .map((p, index) => ({
       id: p?.id || `row-${index + 1}`,
       autoId: index + 1,
       name: p?.nom_produit,
-      price: p?.prix_par_unite ? `${parseFloat(p.prix_par_unite).toFixed(2)} €` : "Non spécifié",
+      price: p?.prix_par_unite
+        ? `${parseFloat(p.prix_par_unite).toFixed(2)} €`
+        : "Non spécifié",
       quantity: p?.quantite_en_stock || 0,
       orderedQuantity: calculateOrderedQuantity(p.id),
-      statut: p?.statut, // Ajouter le statut pour l'affichage
+      statut: p?.statut,
       urlsPhotos: p?.urlsPhotos || [],
     }));
+
+  // Filtrer les produits en fonction du terme de recherche
+  const filteredProducts = sortedProducts.filter((product) =>
+    product.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
   const handleViewDetails = (product) => {
     setSelectedProduct(product);
-    setActivePhotoIndex(0); // Affiche la première photo par défaut
+    setActivePhotoIndex(0);
     setViewDetailsOpen(true);
   };
 
@@ -135,43 +177,60 @@ const ProductList = () => {
   };
 
   const handleEditProduct = (productselected) => {
-    // Rechercher le produit par ID dans le tableau des produits
     const productToEdit = product.find((p) => p.id === productselected.id);
-   
-  
+
     if (productToEdit) {
-      setEditProduct(productToEdit); // Définir le produit à modifier
-      setEditOpen(true); // Ouvrir le modal de modification
+      setEditProduct(productToEdit);
+      setEditOpen(true);
     } else {
-      toast.error("Produit non trouvé"); // Afficher un message d'erreur si le produit n'est pas trouvé
+      toast.error("Produit non trouvé");
     }
   };
-  
-  
 
   const handleEditModalClose = () => {
-    setEditOpen(false); // Fermer le modal de modification
-    setEditProduct(null); // Réinitialiser le produit à modifier
+    setEditOpen(false);
+    setEditProduct(null);
   };
 
   return (
     <div className="px-8 mt-28 flex flex-col gap-5 sm:pr-9">
       <ToastContainer />
       <h2 className="font-black text-3xl block md:hidden">Les produits</h2>
+      <div className="flex justify-end mb-2">
+        <TextField
+          variant="outlined"
+          label="Rechercher par nom"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          sx={{
+            maxWidth: "600px", // Définir une largeur maximale
+            width: "100%", // Assurer que le champ de recherche utilise toute la largeur disponible jusqu'à la largeur maximale
+          }}
+        />
+      </div>
+
       <Table
-        columns={(isMobile) => columns(isMobile, handleViewDetails, handleDisableProduct, handleActivateProduct, handleEditProduct)}
-        rows={sortedProducts}
+        columns={(isMobile) =>
+          columns(
+            isMobile,
+            handleViewDetails,
+            handleDisableProduct,
+            handleActivateProduct,
+            handleEditProduct
+          )
+        }
+        rows={filteredProducts} // Utiliser les produits filtrés
         isMobile={isMobile}
         sx={{
-          '& .MuiDataGrid-cell': {
-            padding: '4px 8px', // Réduit le padding des cellules
+          "& .MuiDataGrid-cell": {
+            padding: "4px 8px",
           },
-          '& .MuiDataGrid-columnHeaders': {
-            padding: '8px', // Ajuste le padding des en-têtes de colonnes
-            textAlign: 'center', // Centre le texte des en-têtes de colonnes
+          "& .MuiDataGrid-columnHeaders": {
+            padding: "8px",
+            textAlign: "center",
           },
-          '& .MuiDataGrid-footer': {
-            padding: '8px', // Ajuste le padding du pied de page
+          "& .MuiDataGrid-footer": {
+            padding: "8px",
           },
         }}
       />
@@ -187,7 +246,7 @@ const ProductList = () => {
       <Modal open={open} onClose={handleClose}>
         <Box
           className={`absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%] bg-white p-4 rounded-lg shadow-lg ${
-            isMobile ? 'w-[90vw]' : isTablet ? 'w-[70vw]' : 'w-[400px]'
+            isMobile ? "w-[90vw]" : isTablet ? "w-[70vw]" : "w-[400px]"
           }`}
         >
           <div className="flex justify-end">
@@ -201,8 +260,8 @@ const ProductList = () => {
 
       <Modal open={editOpen} onClose={handleEditModalClose}>
         <Box
-          className={`absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%] bg-white p-4 rounded-lg ${
-            isMobile ? 'w-[90vw]' : 'w-[400px]'
+          className={`absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%] bg-white p-4 rounded-lg shadow-lg ${
+            isMobile ? "w-[90vw]" : isTablet ? "w-[70vw]" : "w-[400px]"
           }`}
         >
           <div className="flex justify-end">
@@ -213,17 +272,17 @@ const ProductList = () => {
           {editProduct && (
             <ProductEditForm
               product={editProduct}
-              categories={categories}
               onClose={handleEditModalClose}
             />
           )}
         </Box>
       </Modal>
 
+      {/* Modal pour afficher les détails du produit */}
       <Modal open={viewDetailsOpen} onClose={handleViewDetailsClose}>
         <Box
-          className={`absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%] bg-white p-4 rounded-lg ${
-            isMobile ? 'w-[90vw]' : 'w-[400px]'
+          className={`absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%] bg-white p-4 rounded-lg shadow-lg ${
+            isMobile ? "w-[90vw]" : isTablet ? "w-[70vw]" : "w-[600px]"
           }`}
         >
           <div className="flex justify-end">
@@ -232,45 +291,40 @@ const ProductList = () => {
             </IconButton>
           </div>
           {selectedProduct && (
-            <>
-              <Typography variant="h6" gutterBottom>
-                {selectedProduct.name}
-              </Typography>
-              <Typography variant="body1" paragraph>
-                Prix : {selectedProduct.price}
-              </Typography>
-              <Typography variant="body1" paragraph>
-                Quantité en stock : {selectedProduct.quantity}
-              </Typography>
-              <Typography variant="body1" paragraph>
-                Quantité commandée : {selectedProduct.orderedQuantity}
+            <div>
+              <Typography variant="h6" component="div" className="mb-4">
+                Détails du produit
               </Typography>
               <div className="flex flex-col items-center">
-                <img
-                  src={selectedProduct.urlsPhotos[activePhotoIndex]}
-                  alt={`photo ${activePhotoIndex + 1}`}
-                  style={{ maxWidth: '100%', maxHeight: '400px', objectFit: 'contain' }}
-                />
-                <div className="flex justify-between w-full mt-2">
-                  {selectedProduct.urlsPhotos.length > 1 && (
-                    <>
+                {selectedProduct.urlsPhotos.length > 0 && (
+                  <img
+                    src={selectedProduct.urlsPhotos[activePhotoIndex]}
+                    alt={`Photo ${activePhotoIndex + 1}`}
+                    style={{
+                      maxWidth: "100%",
+                      maxHeight: "400px",
+                      objectFit: "contain",
+                    }}
+                    className="mb-2"
+                  />
+                )}
+                {selectedProduct.urlsPhotos.length > 1 && (
+                  <div className="flex gap-2">
+                    {selectedProduct.urlsPhotos.map((_, index) => (
                       <Button
-                        onClick={() => setActivePhotoIndex((prev) => Math.max(prev - 1, 0))}
-                        disabled={activePhotoIndex === 0}
+                        key={index}
+                        onClick={() => setActivePhotoIndex(index)}
+                        variant={
+                          index === activePhotoIndex ? "contained" : "outlined"
+                        }
                       >
-                        Précédent
+                        Photo {index + 1}
                       </Button>
-                      <Button
-                        onClick={() => setActivePhotoIndex((prev) => Math.min(prev + 1, selectedProduct.urlsPhotos.length - 1))}
-                        disabled={activePhotoIndex === selectedProduct.urlsPhotos.length - 1}
-                      >
-                        Suivant
-                      </Button>
-                    </>
-                  )}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
-            </>
+            </div>
           )}
         </Box>
       </Modal>
