@@ -20,7 +20,7 @@ const NavBar = () => {
   };
 
   return (
-    <div className="h-20 bg-custom-gradient flex items-center justify-between px-4 sm:px-6 lg:px-[15%]">
+    <div className="h-20 bg-custom-gradient flex items-center justify-between px-4 sm:px-6 lg:px-[20%]">
      
       <div className="md:hidden">
         <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-customGray">

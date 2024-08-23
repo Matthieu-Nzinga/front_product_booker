@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { API_URL, GET_CATEGORIES, POST_PRODUCTS, PRODUCTS, } from "../../config";
+import { API_URL, GET_CATEGORIES, GET_COMMANDS, POST_COMMANDS, POST_PRODUCTS, PRODUCTS, PUT_COMMANDS, } from "../../config";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 
@@ -35,6 +35,8 @@ export const getAllProduits = createAsyncThunk(
       const response = await api.get(PRODUCTS);
       return response.data;
     } catch (error) {
+      console.log(error);
+      
       return thunkApi.rejectWithValue(error);
     }
   }
@@ -69,9 +71,46 @@ export const getAllCategories = createAsyncThunk(
     }
 )
 
+export const postCommand = createAsyncThunk(
+  "post/postCommand",
+  async (data, thunkApi) => {
+      try {
+        const response = await api.post(POST_COMMANDS, data)
+    return response.data;
+      } catch (error) {
+        return thunkApi.rejectWithValue(error);
+      }
+  }
+)
+export const getAllCommands = createAsyncThunk(
+  "get/getAllCommands",
+  async () => {
+      try {
+        const response = await api.get(GET_COMMANDS)
+    return response.data.commandes;
+      } catch (error) {
+        return thunkApi.rejectWithValue(error);
+      }
+  }
+)
+
+export const putCommand = createAsyncThunk(
+  "put/putCommand",
+  async (idCommand, thunkApi) => {
+    
+           try {
+            const response = await api.put(PUT_COMMANDS + idCommand)
+           return response.data.commande;
+           } catch (error) {
+            console.log(error);
+              return thunkApi.rejectWithValue(error);
+           }
+  }
+)
 const initialState = {
   product: [],
   categories: [],
+  commands: [],
   error: null,
 };
 
@@ -107,6 +146,41 @@ const products = createSlice({
         state.error = null; 
       })
       .addCase(getAllCategories.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.error.message;
+      })
+      .addCase(postCommand.pending, (state) => {
+        state.status = 'loading';
+      })
+      .addCase(postCommand.fulfilled, (state, action) => {
+        state.commands.push(action.payload);
+        state.error = null; 
+      })
+      .addCase(postCommand.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.error.message;
+      })
+      .addCase(getAllCommands.pending, (state) => {
+        state.status = 'loading';
+      })
+      .addCase(getAllCommands.fulfilled, (state, action) => {
+        state.commands = action.payload;
+        state.error = null; 
+      })
+      .addCase(getAllCommands.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.error.message;
+      })
+      .addCase(putCommand.pending, (state) => {
+        state.status = 'loading';
+      })
+      .addCase(putCommand.fulfilled, (state, action) => {
+        const index = state.commands.findIndex(order => order.id === action.payload.id);
+        if (index !== -1) {
+          state.commands[index].status = action.payload.status;
+        }
+      })
+      .addCase(putCommand.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.error.message;
       })

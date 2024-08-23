@@ -12,7 +12,7 @@ const Home = () => {
   }, [dispatch]);
 
   return (
-    <div className="px-4 sm:px-6 lg:px-[10%] xl:px-[15%]">
+    <div className="px-4 sm:px-6">
       <h1 className="font-black text-3xl sm:text-4xl lg:text-5xl my-5 sm:my-7">
         Les <span className="text-customBlue">Produits</span> disponibles
       </h1>
