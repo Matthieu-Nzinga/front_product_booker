@@ -6,7 +6,10 @@ const LayoutClient = () => {
   return (
     <div>
         <NavBar/>
+        <div className='lg:px-[20%]'>
+
         <Outlet/>
+        </div>
     </div>
   )
 }
