@@ -3,40 +3,53 @@ import { Modal, Box, IconButton, Typography, Button, Tooltip } from "@mui/materi
 import CloseIcon from "@mui/icons-material/Close";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import DisabledByDefaultIcon from "@mui/icons-material/DisabledByDefault";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline"; // Nouvelle icône
 import ProductForm from "./ProductForm";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllCategories, getAllCommands, getAllProduits, hideProduct } from "../features/products/products";
+import { activateProduct, getAllCategories, getAllCommands, getAllProduits, hideProduct } from "../features/products/products";
 import { toast, ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import Table from "./Table";
 import { useMediaQuery } from '@mui/material';
 
-const columns = (isMobile, handleViewDetails, handleDisableProduct) => [
+const columns = (isMobile, handleViewDetails, handleDisableProduct, handleActivateProduct) => [
   { field: "name", headerName: "Nom", width: isMobile ? 100 : 300 },
   { field: "price", headerName: "Prix", width: isMobile ? 100 : 300 },
   { field: "quantity", headerName: "Stock disponible", width: isMobile ? 100 : 300 },
   { field: "orderedQuantity", headerName: "Quantité commandée", width: isMobile ? 100 : 300 },
   {
-    field: "actions",
+    field: "visualisation",
     headerName: "Visualiser",
-    width: isMobile ? 200 : 300,
+    width: isMobile ? 250 : 300,
     renderCell: (params) => (
       <div>
         <IconButton onClick={() => handleViewDetails(params.row)}>
           <VisibilityIcon />
         </IconButton>
-        <Tooltip title="Désactiver le produit" arrow>
-          <IconButton
-            onClick={() => handleDisableProduct(params.row.id)}
-            color="error"
-          >
-            <DisabledByDefaultIcon />
-          </IconButton>
-        </Tooltip>
+        {params.row.statut ? (
+          <Tooltip title="Désactiver le produit" arrow>
+            <IconButton
+              onClick={() => handleDisableProduct(params.row.id)}
+              color="error"
+            >
+              <DisabledByDefaultIcon />
+            </IconButton>
+          </Tooltip>
+        ) : (
+          <Tooltip title="Activer le produit" arrow>
+            <IconButton
+              onClick={() => handleActivateProduct(params.row.id)}
+              color="success"
+            >
+              <AddCircleOutlineIcon />
+            </IconButton>
+          </Tooltip>
+        )}
       </div>
     ),
   },
 ];
+
 
 const ProductList = () => {
   const { product, categories, commands } = useSelector((state) => state.products);
@@ -64,15 +77,21 @@ const ProductList = () => {
     }, 0);
   };
 
-  const rows = product.map((p, index) => ({
-    id: p?.id || `row-${index + 1}`,
-    autoId: index + 1,
-    name: p?.nom_produit,
-    price: p?.prix_par_unite ? `${parseFloat(p.prix_par_unite).toFixed(2)} €` : "Non spécifié",
-    quantity: p?.quantite_en_stock || 0,
-    orderedQuantity: calculateOrderedQuantity(p.id),
-    urlsPhotos: p?.urlsPhotos || [],
-  }));
+
+
+const sortedProducts = [...product]
+.sort((a, b) => b.statut - a.statut) // Les produits avec statut true viennent en premier
+.map((p, index) => ({
+  id: p?.id || `row-${index + 1}`,
+  autoId: index + 1,
+  name: p?.nom_produit,
+  price: p?.prix_par_unite ? `${parseFloat(p.prix_par_unite).toFixed(2)} €` : "Non spécifié",
+  quantity: p?.quantite_en_stock || 0,
+  orderedQuantity: calculateOrderedQuantity(p.id),
+  statut: p?.statut, // Ajouter le statut pour l'affichage
+  urlsPhotos: p?.urlsPhotos || [],
+}));
+
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -98,13 +117,23 @@ const ProductList = () => {
     }
   };
 
+  const handleActivateProduct = async (productId) => {
+    try {
+      await dispatch(activateProduct(productId)); // Ajouter la fonction pour activer le produit
+      toast.success("Produit activé avec succès");
+      dispatch(getAllProduits());
+    } catch (error) {
+      toast.error("Échec de l'activation du produit");
+    }
+  };
+
   return (
     <div className="px-8 mt-28 flex flex-col gap-5 sm:pr-9">
       <ToastContainer />
       <h2 className="font-black text-3xl block md:hidden">Les produits</h2>
       <Table
-        columns={(isMobile) => columns(isMobile, handleViewDetails, handleDisableProduct)}
-        rows={rows}
+        columns={(isMobile) => columns(isMobile, handleViewDetails, handleDisableProduct, handleActivateProduct)}
+        rows={sortedProducts}
         isMobile={isMobile}
         sx={{
           '& .MuiDataGrid-cell': {
