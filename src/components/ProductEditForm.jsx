@@ -11,7 +11,6 @@ const ProductEditForm = ({ product, categories, onClose }) => {
     categories?.find((cat) => cat.id === product.categoryId)?.id || "";
   const [selectedFiles, setSelectedFiles] = useState([]);
   const dispatch = useDispatch();
-
   const {
     control,
     handleSubmit,
@@ -79,6 +78,7 @@ const ProductEditForm = ({ product, categories, onClose }) => {
       const productId = product.id;
       // Envoi des données modifiées
       await dispatch(updateProduct({ formData, productId }));
+      dispatch(getAllProduits())
 
       // Affichage du message de succès et rafraîchissement des données
       toast.success("Produit modifié avec succès");
