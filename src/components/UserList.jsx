@@ -14,16 +14,25 @@ const columns = (isMobile) => [
   { field: "firstname", headerName: "Prénom", width: isMobile ? 100 : 140 },
   { field: "name", headerName: "Nom", width: isMobile ? 100 : 140 },
   { field: "email", headerName: "Email", width: isMobile ? 100 : 280 },
-  { field: "phone", headerName: "Telephone", width: isMobile ? 100 : 150 },
+  { field: "phone", headerName: "Téléphone", width: isMobile ? 100 : 150 },
   { field: "sexe", headerName: "Sexe", width: isMobile ? 100 : 100 },
   { field: "role", headerName: "Rôle", width: isMobile ? 100 : 100 },
+  {
+    field: "status",
+    headerName: "Statut",
+    width: isMobile ? 100 : 120,
+    renderCell: (params) => (
+      <span className={params.value ? "text-green-500" : "text-red-500"}>
+        {params.value ? "Actif" : "Inactif"}
+      </span>
+    ),
+  },
   { field: "actions", headerName: "Actions", width: isMobile ? 100 : 200, renderCell: () => <button className="">Action</button> },
 ];
 
 const UserList = () => {
-    const { user } = useSelector((state) => state.users);
+  const { user } = useSelector((state) => state.users);
   const dispatch = useDispatch();
-
 
   useEffect(() => {
     dispatch(getAllUsers());
@@ -36,7 +45,8 @@ const UserList = () => {
     email: u.email,
     phone: u.phone,
     sexe: u.sexe,
-    role: u.role
+    role: u.role,
+    status: u.statut,  // Remplacez `isActive` par la clé correcte pour le statut dans vos données
   }));
 
   const [open, setOpen] = useState(false);
@@ -44,11 +54,12 @@ const UserList = () => {
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+
   return (
     <div className="px-8 mt-28 flex flex-col gap-5 md:ml-0 ">
-       <ToastContainer />
-      <h2 className='font-black text-3xl block md:hidden'>Les utilisateur</h2>
-      <Table columns={columns} rows={rows} isMobile={isMobile}/>
+      <ToastContainer />
+      <h2 className='font-black text-3xl block md:hidden'>Les utilisateurs</h2>
+      <Table columns={columns} rows={rows} isMobile={isMobile} />
       <div className="flex justify-end">
         <button
           className="text-center font-semibold text-base bg-customBlue px-[107px] text-white py-2 rounded"
@@ -69,7 +80,7 @@ const UserList = () => {
         </Box>
       </Modal>
     </div>
-  )
-}
+  );
+};
 
-export default UserList
+export default UserList;
