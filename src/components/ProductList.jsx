@@ -1,33 +1,45 @@
 import React, { useEffect, useState } from "react";
-import { Modal, Box, IconButton, Grid, Typography, Button } from "@mui/material";
+import { Modal, Box, IconButton, Typography, Button, Tooltip } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import DisabledByDefaultIcon from "@mui/icons-material/DisabledByDefault";
 import ProductForm from "./ProductForm";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllCategories, getAllProduits } from "../features/products/products";
+import { getAllCategories, getAllCommands, getAllProduits, hideProduct } from "../features/products/products";
 import { toast, ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import Table from "./Table";
 import { useMediaQuery } from '@mui/material';
 
-const columns = (isMobile, handleViewDetails) => [
+const columns = (isMobile, handleViewDetails, handleDisableProduct) => [
   { field: "name", headerName: "Nom", width: isMobile ? 100 : 300 },
   { field: "price", headerName: "Prix", width: isMobile ? 100 : 300 },
   { field: "quantity", headerName: "Stock disponible", width: isMobile ? 100 : 300 },
+  { field: "orderedQuantity", headerName: "Quantité commandée", width: isMobile ? 100 : 300 },
   {
     field: "actions",
-    headerName: "Actions",
-    width: isMobile ? 100 : 200,
+    headerName: "Visualiser",
+    width: isMobile ? 200 : 300,
     renderCell: (params) => (
-      <IconButton onClick={() => handleViewDetails(params.row)}>
-        <VisibilityIcon />
-      </IconButton>
+      <div>
+        <IconButton onClick={() => handleViewDetails(params.row)}>
+          <VisibilityIcon />
+        </IconButton>
+        <Tooltip title="Désactiver le produit" arrow>
+          <IconButton
+            onClick={() => handleDisableProduct(params.row.id)}
+            color="error"
+          >
+            <DisabledByDefaultIcon />
+          </IconButton>
+        </Tooltip>
+      </div>
     ),
   },
 ];
 
 const ProductList = () => {
-  const { product, categories } = useSelector((state) => state.products);
+  const { product, categories, commands } = useSelector((state) => state.products);
   const dispatch = useDispatch();
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [open, setOpen] = useState(false);
@@ -39,14 +51,27 @@ const ProductList = () => {
   useEffect(() => {
     dispatch(getAllProduits());
     dispatch(getAllCategories());
+    dispatch(getAllCommands());
   }, [dispatch]);
+
+  const calculateOrderedQuantity = (productId) => {
+    return commands.reduce((total, command) => {
+      if (command.status === 'En attente') {
+        const reservedProduct = command.reservations.find(reservation => reservation.produitId === productId);
+        return total + (reservedProduct ? reservedProduct.quantite_commande : 0);
+      }
+      return total;
+    }, 0);
+  };
+
   const rows = product.map((p, index) => ({
     id: p?.id || `row-${index + 1}`,
     autoId: index + 1,
     name: p?.nom_produit,
     price: p?.prix_par_unite ? `${parseFloat(p.prix_par_unite).toFixed(2)} €` : "Non spécifié",
     quantity: p?.quantite_en_stock || 0,
-    urlsPhotos: p?.urlsPhotos || [],  // Ajout des URLs des photos
+    orderedQuantity: calculateOrderedQuantity(p.id),
+    urlsPhotos: p?.urlsPhotos || [],
   }));
 
   const handleOpen = () => setOpen(true);
@@ -63,11 +88,37 @@ const ProductList = () => {
     setSelectedProduct(null);
   };
 
+  const handleDisableProduct = async (productId) => {
+    try {
+      await dispatch(hideProduct(productId));
+      toast.success("Produit désactivé avec succès");
+      dispatch(getAllProduits());
+    } catch (error) {
+      toast.error("Échec de la désactivation du produit");
+    }
+  };
+
   return (
     <div className="px-8 mt-28 flex flex-col gap-5 sm:pr-9">
       <ToastContainer />
       <h2 className="font-black text-3xl block md:hidden">Les produits</h2>
-      <Table columns={(isMobile) => columns(isMobile, handleViewDetails)} rows={rows} isMobile={isMobile} />
+      <Table
+        columns={(isMobile) => columns(isMobile, handleViewDetails, handleDisableProduct)}
+        rows={rows}
+        isMobile={isMobile}
+        sx={{
+          '& .MuiDataGrid-cell': {
+            padding: '4px 8px', // Réduit le padding des cellules
+          },
+          '& .MuiDataGrid-columnHeaders': {
+            padding: '8px', // Ajuste le padding des en-têtes de colonnes
+            textAlign: 'center', // Centre le texte des en-têtes de colonnes
+          },
+          '& .MuiDataGrid-footer': {
+            padding: '8px', // Ajuste le padding du pied de page
+          },
+        }}
+      />
       <div className="flex justify-end">
         <button
           className="text-center font-semibold text-base bg-customBlue px-[93px] text-white py-2 rounded"
@@ -97,8 +148,8 @@ const ProductList = () => {
           className={`absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%] bg-white p-4 rounded-lg`}
           sx={{
             width: isMobile ? '90vw' : '400px',
-            maxHeight: isMobile ? '80vh' : '80vh', // Limiter la hauteur pour le scroll
-            overflowY: 'auto', // Activer le défilement vertical
+            maxHeight: isMobile ? '80vh' : '80vh',
+            overflowY: 'auto',
           }}
         >
           <div className="flex justify-end">
