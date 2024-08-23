@@ -9,6 +9,19 @@ import { useMediaQuery } from '@mui/material';
 import UserForm from "./UserForm";
 import { getAllUsers } from "../features/users/userSlice";
 
+// Fonction pour formater la date et l'heure
+const formatDateTime = (dateString) => {
+  const options = {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  };
+  const date = new Date(dateString);
+  return date.toLocaleDateString("fr-FR", options).replace(",", " à");
+};
+
 const columns = (isMobile) => [
   { field: "firstname", headerName: "Prénom", width: isMobile ? 100 : 140 },
   { field: "name", headerName: "Nom", width: isMobile ? 100 : 140 },
@@ -16,6 +29,10 @@ const columns = (isMobile) => [
   { field: "phone", headerName: "Téléphone", width: isMobile ? 100 : 150 },
   { field: "accountNumber", headerName: "Numéro de compte", width: isMobile ? 100 : 150 },
   { field: "role", headerName: "Rôle", width: isMobile ? 100 : 100 },
+  {
+    field: "lastLogin", headerName: "Dernière connexion", width: isMobile ? 140 : 180,
+    renderCell: (params) => formatDateTime(params.value),
+  },
   {
     field: "status",
     headerName: "Statut",
@@ -54,11 +71,12 @@ const UserList = () => {
       name: u.name,
       email: u.email,
       phone: u.phone,
-      accountNumber: u.account_number || 'Non spécifié',  // Assurez-vous que le nom du champ correspond à vos données
+      accountNumber: u.account_number || 'Non spécifié',
       role: u.role,
-      status: u.statut,  // Remplacez `isActive` par la clé correcte pour le statut dans vos données
+      lastLogin: u.lastLogin ? u.lastLogin : "Jamais connecté", // Assurez-vous que `lastLogin` existe et est formaté
+      status: u.statut,
     }));
-
+  
   useEffect(() => {
     // Filtrer les utilisateurs en fonction du numéro de compte
     const results = sortedUsers.filter(user =>
@@ -69,7 +87,6 @@ const UserList = () => {
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
-
   return (
     <div className="px-8 mt-28 flex flex-col gap-5 md:ml-0">
       <div className="px-8 mt-28 flex flex-col gap-5 md:ml-0">

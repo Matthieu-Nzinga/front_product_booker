@@ -12,7 +12,7 @@ const ProductForm = ({ onClose, category }) => {
   const [selectedFileName, setSelectedFileName] = useState('');
   const dispatch = useDispatch();
   const { register, handleSubmit, formState: { errors }, setValue } = useForm();
-
+  
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
     if (!file) return;

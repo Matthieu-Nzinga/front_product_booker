@@ -5,10 +5,10 @@ import { useDispatch } from "react-redux";
 import { getAllProduits, updateProduct } from "../features/products/products";
 import { toast } from "react-toastify";
 
-const ProductEditForm = ({ product, categories, onClose }) => {
+const ProductEditForm = ({ product, category, onClose }) => {
   // Initialisez la catégorie par défaut avec l'ID
   const defaultCategoryId =
-    categories?.find((cat) => cat.id === product.categoryId)?.id || "";
+    category?.find((cat) => cat.id === product.categoryId)?.id || "";
   const [selectedFiles, setSelectedFiles] = useState([]);
   const dispatch = useDispatch();
   const {
@@ -205,7 +205,7 @@ const ProductEditForm = ({ product, categories, onClose }) => {
             error={!!errors.categoryId}
             helperText={errors.categoryId ? "La catégorie est requise" : ""}
           >
-            {categories?.map((category) => (
+            {category?.map((category) => (
               <MenuItem key={category.id} value={category.id}>
                 {category.nom}
               </MenuItem>
