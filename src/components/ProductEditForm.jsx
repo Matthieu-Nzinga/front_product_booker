@@ -35,6 +35,8 @@ const ProductEditForm = ({ product, category, onClose }) => {
       setSelectedFiles(product.urlsPhotos);
     }
   }, [product?.urlsPhotos]);
+
+  
   const onSubmit = async (data) => {
     try {
       // Fonction pour télécharger une seule image sur Cloudinary
@@ -42,7 +44,7 @@ const ProductEditForm = ({ product, category, onClose }) => {
         const formData = new FormData();
         formData.append("file", file);
         formData.append("upload_preset", "myImage"); // Assurez-vous que 'myImage' est bien votre preset
-
+  
         const response = await fetch(
           "https://api.cloudinary.com/v1_1/deuutxkyz/image/upload",
           {
@@ -50,15 +52,15 @@ const ProductEditForm = ({ product, category, onClose }) => {
             body: formData,
           }
         );
-
+  
         if (!response.ok) {
           throw new Error("Échec du téléchargement sur Cloudinary");
         }
-
+  
         const cloudinaryData = await response.json();
         return cloudinaryData.secure_url;
       };
-
+  
       // Téléchargez tous les fichiers sélectionnés et récupérez les URLs
       const uploadedUrls = await Promise.all(
         selectedFiles.map(async (file) => {
@@ -66,20 +68,23 @@ const ProductEditForm = ({ product, category, onClose }) => {
           return await uploadToCloudinary(fileBlob);
         })
       );
-
+  
       const parsedQuantity = parseInt(data.quantite_en_stock, 10);
-
+      const parsedPrice = parseFloat(data.prix_par_unite); // Convertir prix_par_unite en float
+  
       // Inclure les URLs téléchargées dans urlsPhotos et ajouter l'ID du produit
       const formData = {
         ...data,
         quantite_en_stock: isNaN(parsedQuantity) ? 0 : parsedQuantity,
+        prix_par_unite: isNaN(parsedPrice) ? 0 : parsedPrice, // Assigner la valeur convertie
         urlsPhotos: uploadedUrls,
       };
       const productId = product.id;
+  
       // Envoi des données modifiées
       await dispatch(updateProduct({ formData, productId }));
-      dispatch(getAllProduits())
-
+      dispatch(getAllProduits());
+  
       // Affichage du message de succès et rafraîchissement des données
       toast.success("Produit modifié avec succès");
       dispatch(getAllProduits());
@@ -90,6 +95,7 @@ const ProductEditForm = ({ product, category, onClose }) => {
       toast.error("Échec de la modification du produit");
     }
   };
+  
 
   const handleFileChange = (event) => {
     const files = Array.from(event.target.files);
