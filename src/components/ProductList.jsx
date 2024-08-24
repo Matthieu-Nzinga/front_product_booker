@@ -281,54 +281,69 @@ const ProductList = () => {
 
       {/* Modal pour afficher les détails du produit */}
       <Modal open={viewDetailsOpen} onClose={handleViewDetailsClose}>
-        <Box
-          className={`absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%] bg-white p-4 rounded-lg shadow-lg ${
-            isMobile ? "w-[90vw]" : isTablet ? "w-[70vw]" : "w-[600px]"
-          }`}
-        >
-          <div className="flex justify-end">
-            <IconButton onClick={handleViewDetailsClose}>
-              <CloseIcon />
-            </IconButton>
-          </div>
-          {selectedProduct && (
-            <div>
-              <Typography variant="h6" component="div" className="mb-4">
-                Détails du produit
-              </Typography>
-              <div className="flex flex-col items-center">
-                {selectedProduct.urlsPhotos.length > 0 && (
-                  <img
-                    src={selectedProduct.urlsPhotos[activePhotoIndex]}
-                    alt={`Photo ${activePhotoIndex + 1}`}
-                    style={{
-                      maxWidth: "100%",
-                      maxHeight: "400px",
-                      objectFit: "contain",
-                    }}
-                    className="mb-2"
-                  />
-                )}
-                {selectedProduct.urlsPhotos.length > 1 && (
-                  <div className="flex gap-2">
-                    {selectedProduct.urlsPhotos.map((_, index) => (
-                      <Button
-                        key={index}
-                        onClick={() => setActivePhotoIndex(index)}
-                        variant={
-                          index === activePhotoIndex ? "contained" : "outlined"
-                        }
-                      >
-                        Photo {index + 1}
-                      </Button>
-                    ))}
-                  </div>
-                )}
-              </div>
+  <Box
+    className={`absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%] bg-white p-4 rounded-lg shadow-lg ${
+      isMobile ? "w-[90vw]" : isTablet ? "w-[70vw]" : "w-[600px]"
+    }`}
+  >
+    <div className="flex justify-end">
+      <IconButton onClick={handleViewDetailsClose}>
+        <CloseIcon />
+      </IconButton>
+    </div>
+    {selectedProduct && (
+      <div>
+        <Typography variant="h6" component="div" className="mb-4">
+          Détails du produit
+        </Typography>
+        <div className="flex flex-col items-center">
+          {selectedProduct.urlsPhotos.length > 0 && (
+            <img
+              src={selectedProduct.urlsPhotos[activePhotoIndex]}
+              alt={`Photo ${activePhotoIndex + 1}`}
+              style={{
+                maxWidth: "100%",
+                maxHeight: "400px",
+                objectFit: "contain",
+              }}
+              className="mb-2"
+            />
+          )}
+          {selectedProduct.urlsPhotos.length > 1 && (
+            <div className="flex gap-2 mb-4">
+              {selectedProduct.urlsPhotos.map((_, index) => (
+                <Button
+                  key={index}
+                  onClick={() => setActivePhotoIndex(index)}
+                  variant={
+                    index === activePhotoIndex ? "contained" : "outlined"
+                  }
+                >
+                  Photo {index + 1}
+                </Button>
+              ))}
             </div>
           )}
-        </Box>
-      </Modal>
+
+          {/* Display additional product details */}
+          <Typography variant="body1" className="mb-2">
+            <strong>Nom :</strong> {selectedProduct.name}
+          </Typography>
+          <Typography variant="body1" className="mb-2">
+            <strong>Quantité commandée :</strong> {selectedProduct.orderedQuantity}
+          </Typography>
+          <Typography variant="body1" className="mb-2">
+            <strong>Prix :</strong> {selectedProduct.price}
+          </Typography>
+          <Typography variant="body1" className="mb-2">
+            <strong>Quantité en stock :</strong> {selectedProduct.quantity}
+          </Typography>
+        </div>
+      </div>
+    )}
+  </Box>
+</Modal>
+
     </div>
   );
 };
