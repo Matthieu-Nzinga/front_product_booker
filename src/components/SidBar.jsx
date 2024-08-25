@@ -48,9 +48,9 @@ const SidBar = () => {
                 isActive ? "border rounded-xl bg-customBlue text-white" : ""
               }
             >
-              <li className="flex items-center gap-2 p-3">
+              {/* <li className="flex items-center gap-2 p-3">
                 <GiCardboardBox size={25} /> Gestion de stock
-              </li>
+              </li> */}
             </NavLink>
             <NavLink
               to="/utilisateurs"

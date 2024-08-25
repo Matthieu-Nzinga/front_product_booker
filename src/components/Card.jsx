@@ -10,8 +10,8 @@ const Card = ({ images, title, id }) => {
 
   return (
     <div className='bg-custom-gradient p-10 rounded-3xl flex flex-col gap-6 border border-customBlue'>
-      <div className='rounded-xl flex items-center justify-center p-10 bg-white/50'>
-        <img src={images[0]} alt="produit" className='w-[50%] h-[25vh]' />
+      <div className='rounded-xl flex items-center justify-center p-10 bg-white'>
+        <img src={images[0]} alt="produit" className='w-[100%] h-[25vh]' />
       </div>
       <div><h1 className='text-2xl font-semibold text-center capitalize'>{title}</h1></div>
       <div className='flex justify-center items-center'>

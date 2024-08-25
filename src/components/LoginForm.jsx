@@ -34,8 +34,7 @@ const LoginForm = () => {
 
     setLoading(true);
     try {
-      await dispatch(userLogin(loginData)).unwrap();
-      toast.success("Connexion réussie");
+      await dispatch(userLogin(loginData));
       reset();
     } catch (error) {
       toast.error("Échec de la connexion, veuillez vérifier vos identifiants");
