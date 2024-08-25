@@ -30,10 +30,12 @@ api.interceptors.request.use(
 
 export const getAllProduits = createAsyncThunk(
   "get/getAllProduits",
-  async () => {
+  async ( thunkApi) => {
     try {
+     
       const response = await api.get(PRODUCTS);
-      return response.data;
+    
+     return response.data;
     } catch (error) {
       return thunkApi.rejectWithValue(error);
     }
