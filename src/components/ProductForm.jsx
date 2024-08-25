@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Box, Button, TextField, IconButton, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { ToastContainer, toast } from "react-toastify";
 import { useDispatch } from "react-redux";
 import { postProduit, getAllProduits } from "../features/products/products"; 
@@ -11,7 +12,7 @@ const ProductForm = ({ onClose, category }) => {
   const [selectedFileName, setSelectedFileName] = useState('');
   const dispatch = useDispatch();
   const { register, handleSubmit, formState: { errors }, setValue } = useForm();
-
+  
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -42,6 +43,10 @@ const ProductForm = ({ onClose, category }) => {
     } catch (error) {
       console.error("Erreur lors du téléchargement de l'image :", error);
     }
+  };
+
+  const handleDeleteImage = (index) => {
+    setImageUrls(prevUrls => prevUrls.filter((_, i) => i !== index));
   };
 
   const handleFormSubmit = async (data) => {
@@ -131,12 +136,26 @@ const ProductForm = ({ onClose, category }) => {
 
         <Box sx={{ display: "flex", flexDirection: "row", gap: 1, flexWrap: "wrap" }}>
           {imageUrls.map((url, index) => (
-            <img
-              key={index}
-              src={url}
-              alt={`Preview ${index}`}
-              style={{ width: "100px", height: "100px", objectFit: "cover", borderRadius: "4px" }}
-            />
+            <Box key={index} sx={{ position: "relative", display: "inline-block" }}>
+              <img
+                src={url}
+                alt={`Preview ${index}`}
+                style={{ width: "100px", height: "100px", objectFit: "cover", borderRadius: "4px" }}
+              />
+              <IconButton
+                onClick={() => handleDeleteImage(index)}
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  right: 0,
+                  color: "red",
+                  backgroundColor: "white",
+                  padding: "2px",
+                }}
+              >
+                <DeleteIcon />
+              </IconButton>
+            </Box>
           ))}
         </Box>
       </Box>
