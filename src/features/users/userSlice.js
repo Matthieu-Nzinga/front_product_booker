@@ -54,6 +54,18 @@ export const postUser = createAsyncThunk(
   }
 );
 
+export const updateUserStatus = createAsyncThunk(
+  "put/updateUser",
+  async ({ id, statut }, { thunkApi }) => {
+    try {
+      const response = await api.put(USERS + "/status/" + id, { statut });
+      return response.data.user;
+    } catch (error) {
+      return thunkApi.rejectWithValue(error);
+    }
+  }
+);
+
 const initialState = {
   user: [],
   error: null,
@@ -82,7 +94,22 @@ const users = createSlice({
       .addCase(postUser.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.error.message;
-      });
+      })
+      .addCase(updateUserStatus.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(updateUserStatus.fulfilled, (state, action) => {
+        const index = state.user.findIndex(
+          (user) => user.id === action.payload.id
+        );
+        if (index !== -1) {
+          state.user[index].statut = action.payload.statut;
+        }
+      })
+      .addCase(updateUserStatus.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      })
   },
 });
 

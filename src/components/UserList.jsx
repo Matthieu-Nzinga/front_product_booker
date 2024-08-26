@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Modal, Box, IconButton, TextField } from "@mui/material";
+import { Modal, Box, IconButton, TextField, Tooltip } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useDispatch, useSelector } from "react-redux";
 import { toast, ToastContainer } from "react-toastify";
@@ -7,7 +7,10 @@ import 'react-toastify/dist/ReactToastify.css';
 import Table from "./Table";
 import { useMediaQuery } from '@mui/material';
 import UserForm from "./UserForm";
-import { getAllUsers } from "../features/users/userSlice";
+import { getAllUsers, updateUserStatus } from "../features/users/userSlice";
+import EditIcon from "@mui/icons-material/Edit";
+import DisabledByDefaultIcon from "@mui/icons-material/DisabledByDefault";
+import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
 
 // Fonction pour formater la date et l'heure
 const formatDateTime = (dateString) => {
@@ -22,28 +25,63 @@ const formatDateTime = (dateString) => {
   return date.toLocaleDateString("fr-FR", options).replace(",", " à");
 };
 
-const columns = (isMobile) => [
-  { field: "firstname", headerName: "Prénom", width: isMobile ? 100 : 140 },
-  { field: "name", headerName: "Nom", width: isMobile ? 100 : 140 },
-  { field: "email", headerName: "Email", width: isMobile ? 100 : 280 },
+const columns = (isMobile, handleDisableUser, handleActivateUser) => [
+  { field: "firstname", headerName: "Prénom", width: isMobile ? 100 : 150 },
+  { field: "name", headerName: "Nom", width: isMobile ? 100 : 130 },
+  { field: "email", headerName: "Email", width: isMobile ? 100 : 150 },
   { field: "phone", headerName: "Téléphone", width: isMobile ? 100 : 150 },
   { field: "accountNumber", headerName: "Numéro de compte", width: isMobile ? 100 : 150 },
   { field: "role", headerName: "Rôle", width: isMobile ? 100 : 100 },
   {
-    field: "lastLogin", headerName: "Dernière connexion", width: isMobile ? 140 : 180,
+    field: "lastLogin", headerName: "Dernière connexion", width: isMobile ? 140 : 150,
     renderCell: (params) => formatDateTime(params.value),
   },
-  {
-    field: "status",
+  
+{
+    field: "statut",
     headerName: "Statut",
     width: isMobile ? 100 : 120,
     renderCell: (params) => (
-      <span className={params.value ? "text-green-500" : "text-red-500"}>
-        {params.value ? "Actif" : "Inactif"}
+      <span className={params.row.statut ? "text-green-500" : "text-red-500"}>
+        {params.row.statut ? "Actif" : "Inactif"}
       </span>
     ),
   },
-  { field: "actions", headerName: "Actions", width: isMobile ? 100 : 200, renderCell: () => <button className="">Action</button> },
+  {
+    field: "actions",
+    headerName: "Actions",
+    width: isMobile ? 100 : 200,
+    renderCell: (params) => (
+      <div className="flex gap-2">
+        <Tooltip title="Modifier l'utilisateur">
+          <IconButton>
+            <EditIcon style={{ fontSize: 20 }} />
+          </IconButton>
+        </Tooltip>
+
+        {params.row.statut ? (
+          <Tooltip title="Désactiver l'utilisateur" arrow>
+            <IconButton
+              onClick={() => handleDisableUser(params.row.id)}
+              color="error"
+            >
+              <DisabledByDefaultIcon style={{ fontSize: 20 }} />
+            </IconButton>
+          </Tooltip>
+        ) : (
+          <Tooltip title="Activer l'utilisateur" arrow>
+            <IconButton
+              onClick={() => handleActivateUser(params.row.id)}
+              color="success"
+            >
+              <CheckCircleOutlineOutlinedIcon style={{ fontSize: 20 }} />
+            </IconButton>
+          </Tooltip>
+        )}
+      </div>
+    ),
+  }
+
 ];
 
 const UserList = () => {
@@ -51,14 +89,12 @@ const UserList = () => {
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState(""); // Etat pour la recherche
-  const [filteredUsers, setFilteredUsers] = useState([]);
   const isMobile = useMediaQuery('(max-width: 640px)');
 
   useEffect(() => {
     dispatch(getAllUsers());
   }, [dispatch]);
 
-  // Trier les utilisateurs pour que les admins apparaissent en premier
   const sortedUsers = [...user]
     .sort((a, b) => {
       if (a.role === 'Admin' && b.role !== 'Admin') return -1;
@@ -73,56 +109,67 @@ const UserList = () => {
       phone: u.phone,
       accountNumber: u.account_number || 'Non spécifié',
       role: u.role,
-      lastLogin: u.lastLogin ? u.lastLogin : "Jamais connecté", // Assurez-vous que `lastLogin` existe et est formaté
-      status: u.statut,
+      lastLogin: u.lastLogin ? u.lastLogin : "Jamais connecté",
+      statut: u.statut,
     }));
-  
-  useEffect(() => {
-    // Filtrer les utilisateurs en fonction du numéro de compte
-    const results = sortedUsers.filter(user =>
-      user.accountNumber.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setFilteredUsers(results);
-  }, [searchTerm, sortedUsers]);
+
+  const filteredUsers = sortedUsers.filter(user =>
+    user.accountNumber.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+
+  // Gestionnaires de clics pour activer/désactiver les utilisateurs
+  const handleDisableUser = (id) => {
+   dispatch(updateUserStatus({ id, statut: false }));
+    toast.success("Utilisateur désactivé !");
+  };
+
+  const handleActivateUser = (id) => {
+    dispatch(updateUserStatus({ id, statut: true }));
+    toast.success("Utilisateur activé !");
+  };
+
   return (
     <div className="px-8 flex flex-col gap-5 md:ml-0">
       <div className="px-8 mt-28 flex flex-col gap-5 md:ml-0">
-      <ToastContainer />
-      <h2 className='font-black text-3xl block md:hidden'>Les utilisateurs</h2>
-      <div className="flex justify-end mb-4">
-        <TextField
-          label="Rechercher par numéro de compte"
-          variant="outlined"
-          margin="normal"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          sx={{ width: 300 }}  // Largeur fixe pour le champ de recherche
-        />
-      </div>
-      <Table columns={columns} rows={filteredUsers} isMobile={isMobile} />
-      <div className="flex justify-end">
-        <button
-          className="text-center mb-4 font-semibold text-base bg-customBlue px-[107px] text-white py-2 rounded"
-          onClick={handleOpen}
-        >
-          Créer un utilisateur
-        </button>
-      </div>
+        <ToastContainer />
+        <h2 className='font-black text-3xl block md:hidden'>Les utilisateurs</h2>
+        <div className="flex justify-end mb-4">
+          <TextField
+            label="Rechercher par numéro de compte"
+            variant="outlined"
+            margin="normal"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            sx={{ width: 300 }}  // Largeur fixe pour le champ de recherche
+          />
+        </div>
+        <Table columns={(isMobile) =>
+          columns(isMobile,
+          handleDisableUser,
+          handleActivateUser)} rows={filteredUsers} isMobile={isMobile} />
+        <div className="flex justify-end">
+          <button
+            className="text-center mb-4 font-semibold text-base bg-customBlue px-[107px] text-white py-2 rounded"
+            onClick={handleOpen}
+          >
+            Créer un utilisateur
+          </button>
+        </div>
 
-      <Modal open={open} onClose={handleClose}>
-        <Box className={`absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%] ${isMobile ? 'w-[90vw]' : 'w-[400px]'} bg-white p-4 rounded-lg`}>
-          <div className="flex justify-end">
-            <IconButton onClick={handleClose}>
-              <CloseIcon />
-            </IconButton>
-          </div>
-          <UserForm onClose={handleClose} />
-        </Box>
-      </Modal>
-    </div>
+        <Modal open={open} onClose={handleClose}>
+          <Box className={`absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%] ${isMobile ? 'w-[90vw]' : 'w-[400px]'} bg-white p-4 rounded-lg`}>
+            <div className="flex justify-end">
+              <IconButton onClick={handleClose}>
+                <CloseIcon />
+              </IconButton>
+            </div>
+            <UserForm onClose={handleClose} />
+          </Box>
+        </Modal>
+      </div>
     </div>
   );
 };

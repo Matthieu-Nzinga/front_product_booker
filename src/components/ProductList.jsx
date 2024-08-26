@@ -69,7 +69,7 @@ const columns = (
           </Tooltip>
           <Tooltip title="Modifier le produit">
             <IconButton onClick={() => handleEditProduct(params.row)}>
-              <EditIcon />
+              <EditIcon style={{ fontSize: 20 }} />
             </IconButton>
           </Tooltip>
           {params.row.statut ? (
@@ -156,7 +156,6 @@ const ProductList = () => {
 
   // Filtrer les produits en fonction du terme de recherche et de la catégorie sélectionnée
   const filteredProducts = sortedProducts.filter((product) => {
-    console.log(selectedCategory)
     const matchesCategory = selectedCategory === "" || product?.category === selectedCategory;
     const matchesSearchTerm = product?.name?.toLowerCase().includes(searchTerm?.toLowerCase());
 
@@ -166,7 +165,6 @@ const ProductList = () => {
   const handleClose = () => setOpen(false);
 
   const handleViewDetails = (product) => {
-    console.log(product)
     setSelectedProduct(product);
     setActivePhotoIndex(0);
     setViewDetailsOpen(true);
@@ -220,14 +218,14 @@ const ProductList = () => {
     <div className="px-8 mt-28 flex flex-col gap-5 sm:pr-9">
       <ToastContainer />
       <h2 className="font-black text-3xl block md:hidden">Les produits</h2>
-      <div className="flex flex-col md:flex-row gap-4 mb-2 items-center justify-between">
-        <FormControl sx={{ minWidth: 130, width: "100%", maxWidth: "300px" }}>
-          <InputLabel id="category-select-label">Filtrer par catégorie</InputLabel>
+      <div className="flex flex-col md:flex-row gap-4 mb-4 items-center justify-between">
+        <FormControl sx={{ minWidth: 130, width: 300, maxWidth: "300px" }}>
+          <InputLabel id="category-select-label">Filtrer par catégorie</InputLabel> {/* Ajoutez InputLabel ici */}
           <Select
             labelId="category-select-label"
             value={selectedCategory}
             onChange={handleCategoryChange}
-            label="Catégorie"
+            label="Filtrer par catégorie"  // Le texte est toujours utilisé ici comme attribut label
           >
             <MenuItem value="">
               <em>Toutes les catégories</em>
@@ -249,9 +247,9 @@ const ProductList = () => {
             width: "100%", // Assurer que le champ de recherche utilise toute la largeur disponible jusqu'à la largeur maximale
           }}
         />
-
-       
       </div>
+
+
 
       <Table
         columns={(isMobile) =>
