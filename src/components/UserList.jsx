@@ -88,7 +88,7 @@ const UserList = () => {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
   return (
-    <div className="px-8 mt-28 flex flex-col gap-5 md:ml-0">
+    <div className="px-8 flex flex-col gap-5 md:ml-0">
       <div className="px-8 mt-28 flex flex-col gap-5 md:ml-0">
       <ToastContainer />
       <h2 className='font-black text-3xl block md:hidden'>Les utilisateurs</h2>
@@ -105,7 +105,7 @@ const UserList = () => {
       <Table columns={columns} rows={filteredUsers} isMobile={isMobile} />
       <div className="flex justify-end">
         <button
-          className="text-center font-semibold text-base bg-customBlue px-[107px] text-white py-2 rounded"
+          className="text-center mb-4 font-semibold text-base bg-customBlue px-[107px] text-white py-2 rounded"
           onClick={handleOpen}
         >
           Créer un utilisateur
