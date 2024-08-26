@@ -91,7 +91,7 @@ export const postCommand = createAsyncThunk(
 );
 export const getAllCommands = createAsyncThunk(
   "get/getAllCommands",
-  async () => {
+  async (thunkApi) => {
     try {
       const response = await api.get(GET_COMMANDS);
       return response.data.commandes;
