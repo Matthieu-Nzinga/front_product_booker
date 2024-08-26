@@ -1,13 +1,25 @@
 import React from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { MdOutlineDashboard } from "react-icons/md";
 import { IoSettingsOutline, IoHelpBuoyOutline } from "react-icons/io5";
-import { GiCardboardBoxClosed, GiCardboardBox } from "react-icons/gi";
+import { GiCardboardBoxClosed} from "react-icons/gi";
 import { LuShoppingCart, LuUsers2 } from "react-icons/lu";
+import { useDispatch } from "react-redux";
+import { removeToken } from "../features/authUtils";
+import { removeTokenAction } from "../features/auth/authSlice";
+import { IoIosLogOut } from "react-icons/io";
 
 const SidBar = () => {
+
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const handleLogout = () => {
+    removeToken();
+    dispatch(removeTokenAction());
+    navigate('/');
+  };
   return (
-    <div className="w-[20%] h-screen bg-custom-gradient text-customGray px-6 py-8 text-base font-normal flex flex-col justify-between fixed">
+    <div className="w-[20%] h-screen bg-custom-gradient text-black px-6 py-8 text-base font-normal flex flex-col justify-between fixed">
       <div className="flex flex-col gap-12">
         <Link className="font-black text-2xl text-customBlue">Logo</Link>
         <nav>
@@ -72,6 +84,18 @@ const SidBar = () => {
                 <IoSettingsOutline size={25} /> Paramètres
               </li>
             </NavLink>
+            <button
+              onClick={handleLogout}
+              className={({ isActive }) =>
+                isActive ? "border rounded-xl bg-customBlue text-white" : ""
+              }
+              
+            >
+              <li className="flex items-center gap-2 p-3">
+                <IoIosLogOut size={25} />   Se déconnecter
+              </li>
+            
+            </button>
           </ul>
         </nav>
       </div>

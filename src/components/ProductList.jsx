@@ -7,11 +7,15 @@ import {
   Button,
   Tooltip,
   TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import DisabledByDefaultIcon from "@mui/icons-material/DisabledByDefault";
-import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
+import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
 import EditIcon from "@mui/icons-material/Edit";
 import ProductForm from "./ProductForm";
 import ProductEditForm from "./ProductEditForm";
@@ -35,57 +39,63 @@ const columns = (
   handleActivateProduct,
   handleEditProduct
 ) => [
-  { field: "name", headerName: "Nom", width: isMobile ? 100 : 300 },
-  { field: "price", headerName: "Prix", width: isMobile ? 100 : 300 },
-  {
-    field: "quantity",
-    headerName: "Stock disponible",
-    width: isMobile ? 100 : 300,
-  },
-  {
-    field: "orderedQuantity",
-    headerName: "Quantité commandée",
-    width: isMobile ? 100 : 300,
-  },
-  {
-    field: "visualisation",
-    headerName: "Visualiser",
-    width: isMobile ? 250 : 300,
-    renderCell: (params) => (
-      <div>
-        <Tooltip title="Détails du produit">
-          <IconButton onClick={() => handleViewDetails(params.row)}>
-            <VisibilityIcon />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Modifier le produit">
-          <IconButton onClick={() => handleEditProduct(params.row)}>
-            <EditIcon />
-          </IconButton>
-        </Tooltip>
-        {params.row.statut ? (
-          <Tooltip title="Désactiver le produit" arrow>
-            <IconButton
-              onClick={() => handleDisableProduct(params.row.id)}
-              color="error"
-            >
-              <DisabledByDefaultIcon />
+    {
+      field: "category",
+      headerName: "Catégorie",
+      width: isMobile ? 100 : 150,
+    },
+    { field: "name", headerName: "Nom", width: isMobile ? 100 : 150 },
+    { field: "price", headerName: "Prix", width: isMobile ? 100 : 150 },
+    {
+      field: "quantity",
+      headerName: "Stock disponible",
+      width: isMobile ? 100 : 150,
+    },
+    {
+      field: "orderedQuantity",
+      headerName: "Quantité commandée",
+      width: isMobile ? 100 : 150,
+    },
+    {
+      field: "visualisation",
+      headerName: "Visualiser",
+      width: isMobile ? 250 : 150,
+      renderCell: (params) => (
+        <div>
+          <Tooltip title="Détails du produit">
+            <IconButton onClick={() => handleViewDetails(params.row)}>
+              <VisibilityIcon />
             </IconButton>
           </Tooltip>
-        ) : (
-          <Tooltip title="Activer le produit" arrow>
-            <IconButton
-              onClick={() => handleActivateProduct(params.row.id)}
-              color="success"
-            >
-              <CheckCircleOutlineOutlinedIcon />
+          <Tooltip title="Modifier le produit">
+            <IconButton onClick={() => handleEditProduct(params.row)}>
+              <EditIcon />
             </IconButton>
           </Tooltip>
-        )}
-      </div>
-    ),
-  },
-];
+          {params.row.statut ? (
+            <Tooltip title="Désactiver le produit" arrow>
+              <IconButton
+                onClick={() => handleDisableProduct(params.row.id)}
+                color="error"
+              >
+                <DisabledByDefaultIcon />
+              </IconButton>
+            </Tooltip>
+          ) : (
+            <Tooltip title="Activer le produit" arrow>
+              <IconButton
+                onClick={() => handleActivateProduct(params.row.id)}
+                color="success"
+              >
+                <CheckCircleOutlineOutlinedIcon />
+              </IconButton>
+            </Tooltip>
+          )}
+        </div>
+      ),
+    },
+  ];
+
 
 const ProductList = () => {
   const { product, categories, commands } = useSelector(
@@ -99,6 +109,7 @@ const ProductList = () => {
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
   const [editProduct, setEditProduct] = useState(null);
   const [searchTerm, setSearchTerm] = useState(""); // État pour le terme de recherche
+  const [selectedCategory, setSelectedCategory] = useState(""); // État pour la catégorie sélectionnée
   const isMobile = useMediaQuery("(max-width: 640px)");
   const isTablet = useMediaQuery("(max-width: 768px)");
 
@@ -107,7 +118,6 @@ const ProductList = () => {
     dispatch(getAllCategories());
     dispatch(getAllCommands());
   }, [dispatch]);
-
   const calculateOrderedQuantity = (productId) => {
     return commands.reduce((total, command) => {
       if (command.status === "En attente") {
@@ -124,28 +134,39 @@ const ProductList = () => {
 
   const sortedProducts = [...product]
     .sort((a, b) => b.statut - a.statut)
-    .map((p, index) => ({
-      id: p?.id || `row-${index + 1}`,
-      autoId: index + 1,
-      name: p?.nom_produit,
-      price: p?.prix_par_unite
-        ? `${parseFloat(p.prix_par_unite).toFixed(2)} €`
-        : "Non spécifié",
-      quantity: p?.quantite_en_stock || 0,
-      orderedQuantity: calculateOrderedQuantity(p.id),
-      statut: p?.statut,
-      urlsPhotos: p?.urlsPhotos || [],
-    }));
+    .map((p, index) => {
+      // Rechercher la catégorie associée au produit en fonction de categoryId
+      const category = categories.find((cat) => cat.id === p.categoryId) || {};
 
-  // Filtrer les produits en fonction du terme de recherche
-  const filteredProducts = sortedProducts.filter((product) =>
-    product?.name?.toLowerCase().includes(searchTerm?.toLowerCase())
-  );
+      return {
+        id: p?.id || `row-${index + 1}`,
+        autoId: index + 1,
+        name: p?.nom_produit,
+        price: p?.prix_par_unite
+          ? `${parseFloat(p.prix_par_unite).toFixed(2)} €`
+          : "Non spécifié",
+        quantity: p?.quantite_en_stock || 0,
+        orderedQuantity: calculateOrderedQuantity(p.id),
+        statut: p?.statut,
+        category: category?.nom || "Non spécifié", // Utiliser le nom de la catégorie ou "Non spécifié"
+        urlsPhotos: p?.urlsPhotos || [],
+      };
+    });
 
+
+  // Filtrer les produits en fonction du terme de recherche et de la catégorie sélectionnée
+  const filteredProducts = sortedProducts.filter((product) => {
+    console.log(selectedCategory)
+    const matchesCategory = selectedCategory === "" || product?.category === selectedCategory;
+    const matchesSearchTerm = product?.name?.toLowerCase().includes(searchTerm?.toLowerCase());
+
+    return matchesCategory && matchesSearchTerm;
+  });
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
   const handleViewDetails = (product) => {
+    console.log(product)
     setSelectedProduct(product);
     setActivePhotoIndex(0);
     setViewDetailsOpen(true);
@@ -178,7 +199,6 @@ const ProductList = () => {
 
   const handleEditProduct = (productselected) => {
     const productToEdit = product.find((p) => p.id === productselected.id);
-
     if (productToEdit) {
       setEditProduct(productToEdit);
       setEditOpen(true);
@@ -192,21 +212,45 @@ const ProductList = () => {
     setEditProduct(null);
   };
 
+  const handleCategoryChange = (event) => {
+    setSelectedCategory(event.target.value);
+  };
+
   return (
     <div className="px-8 mt-28 flex flex-col gap-5 sm:pr-9">
       <ToastContainer />
       <h2 className="font-black text-3xl block md:hidden">Les produits</h2>
-      <div className="flex justify-end mb-2">
+      <div className="flex flex-col md:flex-row gap-4 mb-2 items-center justify-between">
+        <FormControl sx={{ minWidth: 130, width: "100%", maxWidth: "300px" }}>
+          <InputLabel id="category-select-label">Filtrer par catégorie</InputLabel>
+          <Select
+            labelId="category-select-label"
+            value={selectedCategory}
+            onChange={handleCategoryChange}
+            label="Catégorie"
+          >
+            <MenuItem value="">
+              <em>Toutes les catégories</em>
+            </MenuItem>
+            {categories.map((category) => (
+              <MenuItem key={category.id} value={category.nom}>
+                {category.nom}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
         <TextField
           variant="outlined"
           label="Rechercher par nom"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           sx={{
-            maxWidth: "600px", // Définir une largeur maximale
+            maxWidth: "300px", // Définir une largeur maximale
             width: "100%", // Assurer que le champ de recherche utilise toute la largeur disponible jusqu'à la largeur maximale
           }}
         />
+
+       
       </div>
 
       <Table
@@ -219,56 +263,142 @@ const ProductList = () => {
             handleEditProduct
           )
         }
-        rows={filteredProducts} // Utiliser les produits filtrés
+        rows={filteredProducts}
         isMobile={isMobile}
         sx={{
           "& .MuiDataGrid-cell": {
-            padding: "4px 8px",
+            padding: isMobile ? "2px 4px" : "4px 8px",
           },
           "& .MuiDataGrid-columnHeaders": {
-            padding: "8px",
+            padding: isMobile ? "4px" : "8px",
             textAlign: "center",
           },
           "& .MuiDataGrid-footer": {
-            padding: "8px",
+            padding: isMobile ? "4px" : "8px",
           },
         }}
       />
+
       <div className="flex justify-end">
         <button
-          className="text-center font-semibold text-base bg-customBlue px-[93px] text-white py-2 rounded"
+          className="text-center mb-4 font-semibold text-base bg-customBlue px-[93px] text-white py-3 hover:bg-blue-600"
           onClick={handleOpen}
         >
-          AJOUTER LE PRODUIT
+          Ajouter un produit
         </button>
       </div>
-
       <Modal open={open} onClose={handleClose}>
         <Box
-          className={`absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%] bg-white p-4 rounded-lg shadow-lg ${
-            isMobile ? "w-[90vw]" : isTablet ? "w-[70vw]" : "w-[400px]"
-          }`}
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            bgcolor: "background.paper",
+            borderRadius: 1,
+            boxShadow: 24,
+            p: 2,
+            width: isMobile ? "90%" : "600px",
+          }}
+        >
+          <ProductForm handleClose={handleClose} />
+        </Box>
+      </Modal>
+      {/* Modal pour afficher les détails du produit */}
+      <Modal open={viewDetailsOpen} onClose={handleViewDetailsClose}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            bgcolor: "background.paper",
+            borderRadius: 1,
+            boxShadow: 24,
+            p: 2,
+            width: isMobile ? "90%" : "600px",
+            maxHeight: "90vh", // Ajouté pour limiter la hauteur du modal
+            overflowY: "auto", // Ajouté pour permettre le défilement vertical
+          }}
         >
           <div className="flex justify-end">
-            <IconButton onClick={handleClose}>
+            <IconButton onClick={handleViewDetailsClose}>
               <CloseIcon />
             </IconButton>
           </div>
-          <ProductForm onClose={handleClose} category={categories} />
+          {selectedProduct && (
+            <div>
+              <Typography variant="h6" component="div" className="mb-4">
+                Détails du produit
+              </Typography>
+              <div className="flex flex-col items-center">
+                {selectedProduct.urlsPhotos.length > 0 && (
+                  <img
+                    src={selectedProduct.urlsPhotos[activePhotoIndex]}
+                    alt={`Photo ${activePhotoIndex + 1}`}
+                    style={{
+                      maxWidth: "100%",
+                      maxHeight: "400px",
+                      objectFit: "contain",
+                    }}
+                    className="mb-2"
+                  />
+                )}
+                {selectedProduct.urlsPhotos.length > 1 && (
+                  <div className="flex gap-2 mb-4">
+                    {selectedProduct.urlsPhotos.map((_, index) => (
+                      <Button
+                        key={index}
+                        onClick={() => setActivePhotoIndex(index)}
+                        variant={
+                          index === activePhotoIndex ? "contained" : "outlined"
+                        }
+                      >
+                        Photo {index + 1}
+                      </Button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Display additional product details */}
+                <Typography variant="body1" className="mb-2">
+                  <strong>Nom :</strong> {selectedProduct.name}
+                </Typography>
+                <Typography variant="body1" className="mb-2">
+                  <strong>Quantité commandée :</strong> {selectedProduct.orderedQuantity}
+                </Typography>
+                <Typography variant="body1" className="mb-2">
+                  <strong>Prix :</strong> {selectedProduct.price}
+                </Typography>
+                <Typography variant="body1" className="mb-2">
+                  <strong>Quantité en stock :</strong> {selectedProduct.quantity}
+                </Typography>
+              </div>
+            </div>
+          )}
         </Box>
       </Modal>
 
       <Modal open={editOpen} onClose={handleEditModalClose}>
         <Box
-          className={`absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%] bg-white p-4 rounded-lg shadow-lg ${
-            isMobile ? "w-[90vw]" : isTablet ? "w-[70vw]" : "w-[400px]"
-          }`}
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            bgcolor: "background.paper",
+            borderRadius: 1,
+            boxShadow: 24,
+            p: 2,
+            width: isMobile ? "90%" : "600px",
+          }}
         >
-          <div className="flex justify-end">
-            <IconButton onClick={handleEditModalClose}>
-              <CloseIcon />
-            </IconButton>
-          </div>
+          <IconButton
+            sx={{ position: "absolute", top: 8, right: 8 }}
+            onClick={handleEditModalClose}
+          >
+            <CloseIcon />
+          </IconButton>
           {editProduct && (
             <ProductEditForm
               product={editProduct}
@@ -278,72 +408,6 @@ const ProductList = () => {
           )}
         </Box>
       </Modal>
-
-      {/* Modal pour afficher les détails du produit */}
-      <Modal open={viewDetailsOpen} onClose={handleViewDetailsClose}>
-  <Box
-    className={`absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%] bg-white p-4 rounded-lg shadow-lg ${
-      isMobile ? "w-[90vw]" : isTablet ? "w-[70vw]" : "w-[600px]"
-    }`}
-  >
-    <div className="flex justify-end">
-      <IconButton onClick={handleViewDetailsClose}>
-        <CloseIcon />
-      </IconButton>
-    </div>
-    {selectedProduct && (
-      <div>
-        <Typography variant="h6" component="div" className="mb-4">
-          Détails du produit
-        </Typography>
-        <div className="flex flex-col items-center">
-          {selectedProduct.urlsPhotos.length > 0 && (
-            <img
-              src={selectedProduct.urlsPhotos[activePhotoIndex]}
-              alt={`Photo ${activePhotoIndex + 1}`}
-              style={{
-                maxWidth: "100%",
-                maxHeight: "400px",
-                objectFit: "contain",
-              }}
-              className="mb-2"
-            />
-          )}
-          {selectedProduct.urlsPhotos.length > 1 && (
-            <div className="flex gap-2 mb-4">
-              {selectedProduct.urlsPhotos.map((_, index) => (
-                <Button
-                  key={index}
-                  onClick={() => setActivePhotoIndex(index)}
-                  variant={
-                    index === activePhotoIndex ? "contained" : "outlined"
-                  }
-                >
-                  Photo {index + 1}
-                </Button>
-              ))}
-            </div>
-          )}
-
-          {/* Display additional product details */}
-          <Typography variant="body1" className="mb-2">
-            <strong>Nom :</strong> {selectedProduct.name}
-          </Typography>
-          <Typography variant="body1" className="mb-2">
-            <strong>Quantité commandée :</strong> {selectedProduct.orderedQuantity}
-          </Typography>
-          <Typography variant="body1" className="mb-2">
-            <strong>Prix :</strong> {selectedProduct.price}
-          </Typography>
-          <Typography variant="body1" className="mb-2">
-            <strong>Quantité en stock :</strong> {selectedProduct.quantity}
-          </Typography>
-        </div>
-      </div>
-    )}
-  </Box>
-</Modal>
-
     </div>
   );
 };
