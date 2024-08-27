@@ -8,6 +8,8 @@ import { removeToken } from "../features/authUtils";
 import { removeTokenAction } from "../features/auth/authSlice";
 import { IoIosLogOut } from "react-icons/io";
 import logoImg from '../../public/logo.png';
+import { RiSurveyLine } from "react-icons/ri";
+<RiSurveyLine />
 
 const SidBar = () => {
 
@@ -72,6 +74,16 @@ const SidBar = () => {
             >
               <li className="flex items-center gap-2 p-3">
                 <LuUsers2 size={25} /> Utilisateurs
+              </li>
+            </NavLink>
+            <NavLink
+              to="/sondage"
+              className={({ isActive }) =>
+                isActive ? "border rounded-xl bg-customBlue text-white" : ""
+              }
+            >
+              <li className="flex items-center gap-2 p-3">
+              <RiSurveyLine size={25}/> Sondage
               </li>
             </NavLink>
             

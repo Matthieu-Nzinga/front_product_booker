@@ -11,6 +11,7 @@ import { useMediaQuery } from "@mui/material";
 import { toast, ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 
+
 const statusColors = {
     "En attente": "#F4BD13",
     "Livré": "green",
@@ -131,7 +132,6 @@ const Commands = () => {
                     isMobile={isMobile}
                 />
             </div>
-
             <Modal open={open} onClose={handleCloseModal}>
                 <Box
                     className={`absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%] bg-white p-4 rounded-lg shadow-lg ${isMobile ? "w-[90vw]" : "w-[400px]"
