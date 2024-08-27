@@ -20,6 +20,7 @@ import MyReservations from "./pages/MyReservations";
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import DetailsProduct from "./pages/DetailsProduct";
 import Commands from "./pages/Commands";
+import Sondage from "./pages/Sondage";
 
 
 const unAuthRoutes = [
@@ -57,6 +58,10 @@ const adminRoutes = [
       {
         path: "parameters",
         element: <Parameters />,
+      },
+      {
+        path: "sondage",
+        element: <Sondage />,
       },
     ],
   },
