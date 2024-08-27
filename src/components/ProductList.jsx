@@ -230,7 +230,7 @@ const ProductList = () => {
             <MenuItem value="">
               <em>Toutes les catégories</em>
             </MenuItem>
-            {categories.map((category) => (
+            {categories?.map((category) => (
               <MenuItem key={category.id} value={category.nom}>
                 {category.nom}
               </MenuItem>
