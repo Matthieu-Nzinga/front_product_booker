@@ -85,6 +85,7 @@ export const postCommand = createAsyncThunk(
       const response = await api.post(POST_COMMANDS, data);
       return response.data;
     } catch (error) {
+      console.log(error)
       return thunkApi.rejectWithValue(error);
     }
   }
