@@ -11,6 +11,7 @@ import { getAllUsers, updateUserStatus } from "../features/users/userSlice";
 import EditIcon from "@mui/icons-material/Edit";
 import DisabledByDefaultIcon from "@mui/icons-material/DisabledByDefault";
 import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
+import UserEditForm from "./UserEditForm";
 
 // Fonction pour formater la date et l'heure
 const formatDateTime = (dateString) => {
@@ -25,19 +26,18 @@ const formatDateTime = (dateString) => {
   return date.toLocaleDateString("fr-FR", options).replace(",", " à");
 };
 
-const columns = (isMobile, handleDisableUser, handleActivateUser) => [
-  { field: "firstname", headerName: "Prénom", width: isMobile ? 100 : 150 },
+const columns = (isMobile, handleDisableUser, handleActivateUser, handleEditUser) => [
+  { field: "first_name", headerName: "Prénom", width: isMobile ? 100 : 150 },
   { field: "name", headerName: "Nom", width: isMobile ? 100 : 130 },
   { field: "email", headerName: "Email", width: isMobile ? 100 : 150 },
   { field: "phone", headerName: "Téléphone", width: isMobile ? 100 : 150 },
-  { field: "accountNumber", headerName: "Numéro de compte", width: isMobile ? 100 : 150 },
+  { field: "account_number", headerName: "Numéro de compte", width: isMobile ? 100 : 150 },
   { field: "role", headerName: "Rôle", width: isMobile ? 100 : 100 },
   {
     field: "lastLogin", headerName: "Dernière connexion", width: isMobile ? 140 : 150,
     renderCell: (params) => formatDateTime(params.value),
   },
-  
-{
+  {
     field: "statut",
     headerName: "Statut",
     width: isMobile ? 100 : 120,
@@ -54,7 +54,7 @@ const columns = (isMobile, handleDisableUser, handleActivateUser) => [
     renderCell: (params) => (
       <div className="flex gap-2">
         <Tooltip title="Modifier l'utilisateur">
-          <IconButton>
+          <IconButton onClick={() => handleEditUser(params.row)}>
             <EditIcon style={{ fontSize: 20 }} />
           </IconButton>
         </Tooltip>
@@ -80,9 +80,9 @@ const columns = (isMobile, handleDisableUser, handleActivateUser) => [
         )}
       </div>
     ),
-  }
-
+  },
 ];
+
 
 const UserList = () => {
   const { user } = useSelector((state) => state.users);
@@ -90,11 +90,13 @@ const UserList = () => {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState(""); // Etat pour la recherche
   const isMobile = useMediaQuery('(max-width: 640px)');
+  const [editOpen, setEditOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+
 
   useEffect(() => {
     dispatch(getAllUsers());
   }, [dispatch]);
-
   const sortedUsers = [...user]
     .sort((a, b) => {
       if (a.role === 'Admin' && b.role !== 'Admin') return -1;
@@ -103,18 +105,18 @@ const UserList = () => {
     })
     .map((u, index) => ({
       id: u.id || `row-${index + 1}`,
-      firstname: u.first_name,
+      first_name: u.first_name,
       name: u.name,
       email: u.email,
       phone: u.phone,
-      accountNumber: u.account_number || 'Non spécifié',
+      account_number: u.account_number || 'Non spécifié',
       role: u.role,
       lastLogin: u.lastLogin ? u.lastLogin : "Jamais connecté",
       statut: u.statut,
     }));
 
   const filteredUsers = sortedUsers.filter(user =>
-    user.accountNumber.toLowerCase().includes(searchTerm.toLowerCase())
+    user.account_number.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleOpen = () => setOpen(true);
@@ -122,7 +124,7 @@ const UserList = () => {
 
   // Gestionnaires de clics pour activer/désactiver les utilisateurs
   const handleDisableUser = (id) => {
-   dispatch(updateUserStatus({ id, statut: false }));
+    dispatch(updateUserStatus({ id, statut: false }));
     toast.success("Utilisateur désactivé !");
   };
 
@@ -130,6 +132,11 @@ const UserList = () => {
     dispatch(updateUserStatus({ id, statut: true }));
     toast.success("Utilisateur activé !");
   };
+  const handleEditUser = (user) => {
+    setSelectedUser(user);
+    setEditOpen(true);
+  };
+
 
   return (
     <div className="px-8 flex flex-col gap-5 md:ml-0">
@@ -148,8 +155,13 @@ const UserList = () => {
         </div>
         <Table columns={(isMobile) =>
           columns(isMobile,
-          handleDisableUser,
-          handleActivateUser)} rows={filteredUsers} isMobile={isMobile} />
+            handleDisableUser,
+            handleActivateUser,
+            handleEditUser
+          )}
+          rows={filteredUsers}
+          isMobile={isMobile}
+        />
         <div className="flex justify-end">
           <button
             className="text-center mb-4 font-semibold text-base bg-customBlue px-[107px] text-white py-2 rounded"
@@ -169,6 +181,33 @@ const UserList = () => {
             <UserForm onClose={handleClose} />
           </Box>
         </Modal>
+        <Modal open={editOpen} onClose={() => setEditOpen(false)}>
+          <Box
+            className={`absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%] ${isMobile ? 'w-[90vw]' : 'w-[400px]'
+              } bg-white p-4 rounded-lg`}
+            sx={{
+              maxHeight: '90vh', // Limite la hauteur du modal
+              overflowY: 'auto',  // Ajoute le défilement vertical
+            }}
+          >
+            <div className="flex justify-end">
+              <IconButton onClick={() => setEditOpen(false)}>
+                <CloseIcon />
+              </IconButton>
+            </div>
+            {selectedUser && (
+              <UserEditForm
+                userData={selectedUser}
+                onSubmit={(data) => {
+                  // Gérer la mise à jour de l'utilisateur ici (dispatch une action)
+                  setEditOpen(false); // Fermer le modal après la mise à jour
+                }}
+                onClose={() => setEditOpen(false)}
+              />
+            )}
+          </Box>
+        </Modal>
+
       </div>
     </div>
   );
