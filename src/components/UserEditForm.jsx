@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Box, TextField, MenuItem, Button } from "@mui/material";
+import { Box, TextField, MenuItem, Button, IconButton, InputAdornment } from "@mui/material";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllUsers, updateUser } from "../features/users/userSlice";
@@ -10,10 +12,16 @@ const UserEditForm = ({ userData, onClose }) => {
     const { user } = useSelector((state) => state.users);
     const currentUser = user?.find(user => user.id === userData.id);
     const { register, handleSubmit, formState: { errors }, watch } = useForm({
-        defaultValues: currentUser || userData,
+        defaultValues: {
+            ...currentUser || userData,
+            password: '',
+            confirmPassword: ''
+        }
     });
 
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const password = watch("password");
 
     useEffect(() => {
@@ -108,7 +116,7 @@ const UserEditForm = ({ userData, onClose }) => {
             </TextField>
             <TextField
                 label="Mot de passe"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 {...register("password", {
                     required: "Mot de passe est requis",
                     minLength: { value: 5, message: "Le mot de passe doit comporter au moins 5 caractères" }
@@ -116,10 +124,22 @@ const UserEditForm = ({ userData, onClose }) => {
                 error={!!errors.password}
                 helperText={errors.password?.message}
                 fullWidth
+                InputProps={{
+                    endAdornment: (
+                        <InputAdornment position="end">
+                            <IconButton
+                                onClick={() => setShowPassword(!showPassword)}
+                                edge="end"
+                            >
+                                {showPassword ? <VisibilityOff /> : <Visibility />}
+                            </IconButton>
+                        </InputAdornment>
+                    ),
+                }}
             />
             <TextField
                 label="Confirmer le mot de passe"
-                type="password"
+                type={showConfirmPassword ? "text" : "password"}
                 {...register("confirmPassword", {
                     required: "Confirmation du mot de passe est requise",
                     validate: value => value === password || "Les mots de passe ne correspondent pas"
@@ -127,6 +147,18 @@ const UserEditForm = ({ userData, onClose }) => {
                 error={!!errors.confirmPassword}
                 helperText={errors.confirmPassword?.message}
                 fullWidth
+                InputProps={{
+                    endAdornment: (
+                        <InputAdornment position="end">
+                            <IconButton
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                edge="end"
+                            >
+                                {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                            </IconButton>
+                        </InputAdornment>
+                    ),
+                }}
             />
             <Button
                 type="submit"
