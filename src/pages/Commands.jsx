@@ -64,8 +64,17 @@ const Commands = () => {
     const sortedCommands = commands
         .slice()
         .sort((a, b) => {
-            if (a.status === 'En attente' && b.status !== 'En attente') return -1;
-            if (a.status !== 'En attente' && b.status === 'En attente') return 1;
+            // Priorité sur les statuts
+            const statusOrder = { "En attente": 1, "En cours": 2, "Livré": 3 };
+
+            const statusA = statusOrder[a.status] || 4; // 4 pour tout autre statut
+            const statusB = statusOrder[b.status] || 4;
+
+            if (statusA !== statusB) {
+                return statusA - statusB; // Trier d'abord par statut
+            }
+
+            // Si les statuts sont les mêmes, trier par date (le plus récent en premier)
             return new Date(b.createdAt) - new Date(a.createdAt);
         });
 
@@ -78,6 +87,7 @@ const Commands = () => {
         prixTotal: command.total_commande + " €",
         statut: command.status || "N/A",
     }));
+
 
     const handleOpenModal = (commandId) => {
         const command = commands.find((cmd) => cmd.id === commandId);
