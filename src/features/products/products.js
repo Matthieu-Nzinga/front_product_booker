@@ -130,7 +130,6 @@ export const updateProduct = createAsyncThunk(
        const response = await api.put(PUT_PRODUCT + productId, formData)
        return response.data.produit;
     } catch (error) {
-      console.log(error)
       return thunkApi.rejectWithValue(error);
     }
   }
