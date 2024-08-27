@@ -45,7 +45,7 @@ const LoginForm = () => {
 
       reset();
     } catch (error) {
-      toast.error(error.message);
+      toast.error("Échec de la connexion, veuillez vérifier vos identifiants");
       reset();
     } finally {
       setLoading(false);
