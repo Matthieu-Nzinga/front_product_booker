@@ -5,6 +5,7 @@ import { FiMenu } from "react-icons/fi";
 import { useDispatch } from "react-redux";
 import { removeToken } from "../features/authUtils";
 import { removeTokenAction } from "../features/auth/authSlice";
+import logoImg from '../../public/logo.png';
 
 const NavBar = () => {
   const [image] = useState(false);
@@ -23,15 +24,16 @@ const NavBar = () => {
     <div className="h-20 bg-custom-gradient flex items-center justify-between px-4 sm:px-6 lg:px-[20%]">
      
       <div className="md:hidden">
-        <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-customGray">
+        <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="">
           <FiMenu size={30} />
         </button>
       </div>
-      <h2 className="hidden md:block font-black text-2xl text-customBlue">LOGO</h2>
       
       <nav className="flex items-center gap-10">
-        
-        <ul className="hidden md:flex items-center gap-10 text-customGray font-semibold text-base">
+        <div className="w-20">
+          
+         </div>
+        <ul className="hidden md:flex items-center gap-10  font-semibold text-base">
           <li>
             <NavLink to="">Produits</NavLink>
           </li>
@@ -63,9 +65,9 @@ const NavBar = () => {
           </div>
           
           {isDropdownOpen && (
-            <div className="absolute right-0 top-full mt-2 w-48 bg-white shadow-lg rounded-md py-2 text-customGray">
+            <div className="absolute right-0 top-full mt-2 w-48 bg-white shadow-lg rounded-md py-2 ">
               <NavLink to="/profil" className="block px-4 py-2 hover:bg-gray-100">Profil</NavLink>
-              <NavLink to="/parametres" className="block px-4 py-2 hover:bg-gray-100">Paramètres</NavLink>
+              {/* <NavLink to="/parametres" className="block px-4 py-2 hover:bg-gray-100">Paramètres</NavLink> */}
               <button 
                 onClick={handleLogout} 
                 className="block px-4 py-2 w-full text-left hover:bg-gray-100"
@@ -79,7 +81,7 @@ const NavBar = () => {
       
       
       <div className={`fixed top-0 left-0 h-full w-[75%] bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isMenuOpen ? "translate-x-0" : "-translate-x-full"} md:hidden`}>
-        <ul className="flex flex-col items-start gap-4 py-8 px-6 text-customGray font-semibold text-base">
+        <ul className="flex flex-col items-start gap-4 py-8 px-6  font-semibold text-base">
           <li>
             <NavLink to="" onClick={() => setIsMenuOpen(false)}>
               Produits
@@ -94,6 +96,12 @@ const NavBar = () => {
             <NavLink to="panier" onClick={() => setIsMenuOpen(false)}>
               Mon panier
             </NavLink>
+             <button 
+                onClick={handleLogout} 
+                className="block px-4 py-2 w-full text-left hover:bg-gray-100"
+              >
+                Se déconnecter
+              </button>
           </li>
         </ul>
       </div>
