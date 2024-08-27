@@ -66,9 +66,9 @@ const Header = ({ text }) => {
 
    
       <div className="flex items-center gap-4">
-        <button className="hidden md:block">
+        {/* <button className="hidden md:block">
           <IoNotificationsOutline size={30} color="black" />
-        </button>
+        </button> */}
         <button onClick={handleDropdownToggle} className="relative">
           {image ? (
             <img
