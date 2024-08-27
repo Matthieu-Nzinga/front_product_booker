@@ -299,7 +299,11 @@ const ProductList = () => {
             width: isMobile ? "90%" : "600px",
           }}
         >
-          <ProductForm handleClose={handleClose} />
+          <ProductForm
+            handleClose={handleClose}
+            category={categories}
+            onClose={handleClose}
+          />
         </Box>
       </Modal>
       {/* Modal pour afficher les détails du produit */}

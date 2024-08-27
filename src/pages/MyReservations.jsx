@@ -14,13 +14,13 @@ const statusColors = {
 };
 
 const columns = (isMobile) => [
-  { field: "date", headerName: "Date", width: isMobile ? 100 : 250 },
-  { field: "nombreProduits", headerName: "Nombre de produits", width: isMobile ? 100 : 200 },
-  { field: "prixTotal", headerName: "Prix total", width: isMobile ? 100 : 200 },
+  { field: "date", headerName: "Date", width: isMobile ? 100 : 150 },
+  { field: "nombreProduits", headerName: "Nombre de produits", width: isMobile ? 100 : 150 },
+  { field: "prixTotal", headerName: "Prix total", width: isMobile ? 100 : 150 },
   { 
     field: "statut", 
     headerName: "Statut", 
-    width: isMobile ? 100 : 200,
+    width: isMobile ? 100 : 150,
     // Ajout de styles conditionnels pour la colonne "statut"
     renderCell: (params) => (
       <div style={{ color: statusColors[params.value] || 'black' }}>
