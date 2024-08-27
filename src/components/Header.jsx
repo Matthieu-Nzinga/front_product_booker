@@ -6,12 +6,10 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { removeToken } from "../features/authUtils";
 import { removeTokenAction } from "../features/auth/authSlice";
 import { Drawer, IconButton } from "@mui/material";
-import { FiMenu } from "react-icons/fi";
 import { MdOutlineDashboard } from "react-icons/md";
 import { GiCardboardBoxClosed, GiCardboardBox } from "react-icons/gi";
 import { LuShoppingCart, LuUsers2 } from "react-icons/lu";
-import { IoSettingsOutline } from "react-icons/io5";
-import { IoHelpBuoyOutline } from "react-icons/io5";
+import { IoIosLogOut } from "react-icons/io";
 
 const Header = ({ text }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -87,7 +85,7 @@ const Header = ({ text }) => {
           {dropdownOpen && (
             <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-300 shadow-lg rounded-lg">
               <NavLink to="/profil" className="block px-4 py-2 hover:bg-gray-100 text-left">Profil</NavLink>
-              <NavLink to="/parametres" className="block px-4 py-2 hover:bg-gray-100 text-left">Paramètres</NavLink>
+              {/* <NavLink to="/parametres" className="block px-4 py-2 hover:bg-gray-100 text-left">Paramètres</NavLink> */}
               <button
                 onClick={handleLogout}
                 className="block px-4 py-2 w-full text-left hover:bg-gray-100"
@@ -109,53 +107,51 @@ const Header = ({ text }) => {
         <div className="p-4 w-64">
           <NavLink
             to="/"
-            className="flex items-center gap-2 p-3 text-customGray hover:bg-gray-100"
+            className="flex items-center gap-2 p-3  hover:bg-gray-100"
             onClick={handleMenuToggle}
           >
             <MdOutlineDashboard size={25} /> Tableau de bord
           </NavLink>
           <NavLink
             to="/products"
-            className="flex items-center gap-2 p-3 text-customGray hover:bg-gray-100"
+            className="flex items-center gap-2 p-3  hover:bg-gray-100"
             onClick={handleMenuToggle}
           >
             <GiCardboardBoxClosed size={25} /> Produits
           </NavLink>
           <NavLink
             to="/Commandes"
-            className="flex items-center gap-2 p-3 text-customGray hover:bg-gray-100"
+            className="flex items-center gap-2 p-3  hover:bg-gray-100"
             onClick={handleMenuToggle}
           >
             <LuShoppingCart size={25} /> Commandes
           </NavLink>
-          <NavLink
+          {/* <NavLink
             to="/stock"
-            className="flex items-center gap-2 p-3 text-customGray hover:bg-gray-100"
+            className="flex items-center gap-2 p-3 hover:bg-gray-100"
             onClick={handleMenuToggle}
           >
             <GiCardboardBox size={25} /> Gestion de stock
-          </NavLink>
+          </NavLink> */}
           <NavLink
             to="/utilisateurs"
-            className="flex items-center gap-2 p-3 text-customGray hover:bg-gray-100"
+            className="flex items-center gap-2 p-3  hover:bg-gray-100"
             onClick={handleMenuToggle}
           >
             <LuUsers2 size={25} /> Utilisateurs
           </NavLink>
-          <NavLink
-            to="/parameters"
-            className="flex items-center gap-2 p-3 text-customGray hover:bg-gray-100"
-            onClick={handleMenuToggle}
+          <button
+            onClick={handleLogout}
+            className={({ isActive }) =>
+              isActive ? "border rounded-xl bg-customBlue text-white" : ""
+            }
+
           >
-            <IoSettingsOutline size={25} /> Paramètres
-          </NavLink>
-          <Link
-            to="/aide"
-            className="flex items-center gap-2 p-3 text-customGray hover:bg-gray-100 mt-auto"
-            onClick={handleMenuToggle}
-          >
-            <IoHelpBuoyOutline size={25} /> Aide et supports
-          </Link>
+            <li className="flex items-center gap-2 p-3">
+              <IoIosLogOut size={25} />   Se déconnecter
+            </li>
+
+          </button>
         </div>
       </Drawer>
     </header>

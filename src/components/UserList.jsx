@@ -182,7 +182,13 @@ const UserList = () => {
         </div>
 
         <Modal open={open} onClose={handleClose}>
-          <Box className={`absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%] ${isMobile ? 'w-[90vw]' : 'w-[400px]'} bg-white p-4 rounded-lg`}>
+          <Box
+            className={`absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%] ${isMobile ? 'w-[90vw]' : 'w-[400px]'} bg-white p-4 rounded-lg`}
+            sx={{
+              maxHeight: isMobile ? '80vh' : '80vh', // Ajuste la hauteur maximale
+              overflowY: 'auto', // Ajoute le défilement vertical
+            }}
+          >
             <div className="flex justify-end">
               <IconButton onClick={handleClose}>
                 <CloseIcon />
@@ -191,6 +197,7 @@ const UserList = () => {
             <UserForm onClose={handleClose} />
           </Box>
         </Modal>
+
         <Modal open={editOpen} onClose={() => setEditOpen(false)}>
           <Box
             className={`absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%] ${isMobile ? 'w-[90vw]' : 'w-[400px]'

@@ -10,6 +10,7 @@ import {
   PUT_COMMANDS,
   PUT_PRODUCT,
   SHOW_PRODUCT,
+  UPDATE_COMMAND,
 } from "../../config";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
@@ -82,7 +83,7 @@ export const postCommand = createAsyncThunk(
   "post/postCommand",
   async (data, thunkApi) => {
     try {
-      const response = await api.post(POST_COMMANDS, data);
+     const response = await api.post(POST_COMMANDS, data);
       return response.data;
     } catch (error) {
       console.log(error)
@@ -104,9 +105,9 @@ export const getAllCommands = createAsyncThunk(
 
 export const putCommand = createAsyncThunk(
   "put/putCommand",
-  async (idCommand, thunkApi) => {
+  async ({ id, status }, { thunkApi }) => {
     try {
-      const response = await api.put(PUT_COMMANDS + idCommand);
+      const response = await api.put(PUT_COMMANDS + id, { status });
       return response.data.commande;
     } catch (error) {
       return thunkApi.rejectWithValue(error);
@@ -141,6 +142,17 @@ export const activateProduct = createAsyncThunk(
     try {
       const response = await api.put(SHOW_PRODUCT + idProduit);
       return response.data.produit;
+    } catch (error) {
+      return thunkApi.rejectWithValue(error);
+    }
+  }
+);
+export const updateCommand = createAsyncThunk(
+  "put/updateCommand",
+  async(updatedData,thunkApi) => {
+    try {
+      const response = await api.put(UPDATE_COMMAND + updatedData.id, updatedData);
+      return response.data.commande;
     } catch (error) {
       return thunkApi.rejectWithValue(error);
     }
@@ -269,7 +281,18 @@ const products = createSlice({
       .addCase(updateProduct.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.error.message;
-      });
+      })
+      .addCase(updateCommand.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(updateCommand.fulfilled, (state, action) => {
+        state.status = "success";
+      })
+      .addCase(updateCommand.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      })
+    
   },
 });
 

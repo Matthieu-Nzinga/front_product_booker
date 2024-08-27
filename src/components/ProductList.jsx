@@ -230,7 +230,7 @@ const ProductList = () => {
             <MenuItem value="">
               <em>Toutes les catégories</em>
             </MenuItem>
-            {categories.map((category) => (
+            {categories?.map((category) => (
               <MenuItem key={category.id} value={category.nom}>
                 {category.nom}
               </MenuItem>
@@ -299,7 +299,11 @@ const ProductList = () => {
             width: isMobile ? "90%" : "600px",
           }}
         >
-          <ProductForm handleClose={handleClose} />
+          <ProductForm
+            handleClose={handleClose}
+            category={categories}
+            onClose={handleClose}
+          />
         </Box>
       </Modal>
       {/* Modal pour afficher les détails du produit */}

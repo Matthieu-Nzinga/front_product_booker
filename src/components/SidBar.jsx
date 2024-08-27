@@ -1,13 +1,13 @@
 import React from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { MdOutlineDashboard } from "react-icons/md";
-import { IoSettingsOutline, IoHelpBuoyOutline } from "react-icons/io5";
 import { GiCardboardBoxClosed} from "react-icons/gi";
 import { LuShoppingCart, LuUsers2 } from "react-icons/lu";
 import { useDispatch } from "react-redux";
 import { removeToken } from "../features/authUtils";
 import { removeTokenAction } from "../features/auth/authSlice";
 import { IoIosLogOut } from "react-icons/io";
+import logoImg from '../../public/logo.png';
 
 const SidBar = () => {
 
@@ -21,7 +21,7 @@ const SidBar = () => {
   return (
     <div className="w-[20%] h-screen bg-custom-gradient text-black px-6 py-8 text-base font-normal flex flex-col justify-between fixed">
       <div className="flex flex-col gap-12">
-        <Link className="font-black text-2xl text-customBlue">Logo</Link>
+        <img src={logoImg} alt="Logo" className='mb-4 h-20 w-20 mx-auto' /> 
         <nav>
           <ul className="flex flex-col">
             <NavLink
@@ -74,16 +74,7 @@ const SidBar = () => {
                 <LuUsers2 size={25} /> Utilisateurs
               </li>
             </NavLink>
-            <NavLink
-              to="/parameters"
-              className={({ isActive }) =>
-                isActive ? "border rounded-xl bg-customBlue text-white" : ""
-              }
-            >
-              <li className="flex items-center gap-2 p-3">
-                <IoSettingsOutline size={25} /> Paramètres
-              </li>
-            </NavLink>
+            
             <button
               onClick={handleLogout}
               className={({ isActive }) =>
@@ -99,9 +90,6 @@ const SidBar = () => {
           </ul>
         </nav>
       </div>
-      <Link className="flex items-center gap-2 px-3">
-        <IoHelpBuoyOutline size={25} /> Aide et supports
-      </Link>
     </div>
   );
 };

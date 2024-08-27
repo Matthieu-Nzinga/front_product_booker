@@ -11,7 +11,7 @@ const ProductForm = ({ onClose, category }) => {
   const [imageUrls, setImageUrls] = useState([]);
   const [selectedFileName, setSelectedFileName] = useState('');
   const dispatch = useDispatch();
-  const { register, handleSubmit, formState: { errors }, setValue } = useForm();
+  const { register, handleSubmit,reset, formState: { errors }, setValue } = useForm();
   
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
@@ -58,6 +58,7 @@ const ProductForm = ({ onClose, category }) => {
     try {
       await dispatch(postProduit(formDataWithImages)).unwrap();
       toast.success("Produit ajouté avec succès");
+      reset()
       dispatch(getAllProduits()); 
       if (onClose) onClose(); 
     } catch (error) {
