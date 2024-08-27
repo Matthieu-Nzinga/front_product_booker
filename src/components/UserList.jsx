@@ -14,7 +14,13 @@ import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutli
 import UserEditForm from "./UserEditForm";
 
 // Fonction pour formater la date et l'heure
-const formatDateTime = (dateString) => {
+const formatDateTime = (dateString, defaultText = "Jamais connecté") => {
+  // Vérifier si la date est valide
+  if (!dateString) return defaultText; // Valeur par défaut si dateString est null ou undefined
+
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return defaultText; // Vérifier si la date est invalide
+
   const options = {
     day: "2-digit",
     month: "2-digit",
@@ -22,7 +28,7 @@ const formatDateTime = (dateString) => {
     hour: "2-digit",
     minute: "2-digit",
   };
-  const date = new Date(dateString);
+
   return date.toLocaleDateString("fr-FR", options).replace(",", " à");
 };
 
@@ -36,6 +42,10 @@ const columns = (isMobile, handleDisableUser, handleActivateUser, handleEditUser
   {
     field: "lastLogin", headerName: "Dernière connexion", width: isMobile ? 140 : 150,
     renderCell: (params) => formatDateTime(params.value),
+  },
+  {
+    field: "lastCommand", headerName: "Dernière commande", width: isMobile ? 140 : 150,
+    renderCell: (params) => formatDateTime(params.value, "Jamais commandé"),
   },
   {
     field: "statut",
@@ -93,7 +103,6 @@ const UserList = () => {
   const [editOpen, setEditOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
 
-
   useEffect(() => {
     dispatch(getAllUsers());
   }, [dispatch]);
@@ -112,6 +121,7 @@ const UserList = () => {
       account_number: u.account_number || 'Non spécifié',
       role: u.role,
       lastLogin: u.lastLogin ? u.lastLogin : "Jamais connecté",
+      lastCommand: u.lastCommand ? u.lastCommand : "Jamais commandé",
       statut: u.statut,
     }));
 
