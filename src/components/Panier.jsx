@@ -13,7 +13,7 @@ const Panier = () => {
   const token = localStorage.getItem("token");
   const decodedToken = jwtDecode(token);
   const userId = decodedToken.id;
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -35,6 +35,8 @@ const Panier = () => {
         0
       );
 
+      const totalCommandeFloat = parseFloat(totalCommande.toFixed(2)); // Converti en float avec deux décimales
+
       const produits = panier.map((produit) => ({
         produitId: produit.id,
         prix_vente: produit.quantite * produit.prix_par_unite,
@@ -44,13 +46,13 @@ const Panier = () => {
       const body = {
         userId: userId,
         produits: produits,
-        total_commande: totalCommande,
+        total_commande: totalCommandeFloat, // Total converti en float avec deux décimales
       };
 
       await dispatch(postCommand(body)).unwrap();
       toast.success("Réservation réussie !");
       dispatch(resetPanier());
-      navigate("/reservations")
+      navigate("/reservations");
 
     } catch (error) {
       toast.error("Échec de la réservation. Veuillez réessayer.");
@@ -62,7 +64,9 @@ const Panier = () => {
   const totalCommande = panier.reduce(
     (acc, produit) => acc + produit.quantite * produit.prix_par_unite,
     0
-  );
+  ).toFixed(2); // Affichage avec deux décimales
+
+  const isPanierVide = panier.length === 0;
 
   return (
     <div className="min-h-screen ">
@@ -82,7 +86,7 @@ const Panier = () => {
             />
             <div className="flex flex-col flex-grow sm:mx-4 mt-4 sm:mt-0">
               <h2 className="text-xl font-bold">{produit.nom_produit}</h2>
-              <p className="text-sm text-gray-600">Prix unitaire: {produit.prix_par_unite}€</p>
+              <p className="text-sm text-gray-600">Prix unitaire: {produit.prix_par_unite.toFixed(2)}€</p>
               <div className="flex items-center gap-2 mt-2">
                 <button
                   onClick={() =>
@@ -105,7 +109,7 @@ const Panier = () => {
                 </button>
               </div>
               <p className="text-sm text-gray-600 mt-2">
-                Prix total: {produit.quantite * produit.prix_par_unite}€
+                Prix total: {(produit.quantite * produit.prix_par_unite).toFixed(2)}€
               </p>
             </div>
             <button
@@ -117,15 +121,15 @@ const Panier = () => {
           </div>
         ))}
       </div>
-      <div className="mt-10 flex flex-col  justify-between items-center text-gray-600 text-base font-black">
+      <div className="mt-10 flex flex-col justify-between items-center text-gray-600 text-base font-black">
         <div className="flex items-center w-full justify-between mb-5">
           TOTAL GENERAL
           <span className="text-black text-2xl ml-2">{totalCommande}€</span>
         </div>
         <button
-          className={`mt-6 sm:mt-0 bg-customBlue w-full md:w-[50%] text-white rounded-md mb-5 py-3 px-6 ${isLoading ? 'cursor-not-allowed ' : ''}`}
+          className={`mt-6 sm:mt-0 bg-customBlue w-full md:w-[50%] text-white rounded-md mb-5 py-3 px-6 ${isLoading ? 'cursor-not-allowed' : ''} ${isPanierVide ? 'opacity-50 bg-gray-500' : ''}`}
           onClick={handleReservation}
-          disabled={isLoading}
+          disabled={isLoading || isPanierVide}
         >
           {isLoading ? "Réservation en cours..." : "TOUT RÉSERVER"}
         </button>
