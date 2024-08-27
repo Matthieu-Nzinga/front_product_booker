@@ -104,9 +104,10 @@ export const getAllCommands = createAsyncThunk(
 
 export const putCommand = createAsyncThunk(
   "put/putCommand",
-  async (idCommand, thunkApi) => {
+  async ({ id, status }, { thunkApi }) => {
+    console.log({status})
     try {
-      const response = await api.put(PUT_COMMANDS + idCommand);
+      const response = await api.put(PUT_COMMANDS + id, { status });
       return response.data.commande;
     } catch (error) {
       return thunkApi.rejectWithValue(error);
