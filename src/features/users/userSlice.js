@@ -69,10 +69,9 @@ export const updateUser = createAsyncThunk(
   "put/updatedUser",
   async ({ formData }, { thunkApi }) => {
     try {
-     const response = await api.put(USERS)
+     const response = await api.put(USERS + "/" + formData.id, formData)
      return response.data.user;
     } catch (error) {
-    
       return thunkApi.rejectWithValue(error);
     }
   }
