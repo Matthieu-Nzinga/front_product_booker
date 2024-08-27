@@ -19,17 +19,17 @@ const statusColors = {
 
 
 const columns = (isMobile, handleViewDetails) => [
-    { field: "date", headerName: "Date", width: isMobile ? 100 : 260 },
+    { field: "date", headerName: "Date", width: isMobile ? 100 : 150 },
     {
         field: "nombreProduits",
         headerName: "Nombre de produits",
         width: isMobile ? 100 : 260,
     },
-    { field: "prixTotal", headerName: "Prix total", width: isMobile ? 100 : 260 },
+    { field: "prixTotal", headerName: "Prix total", width: isMobile ? 100 : 150 },
     {
         field: "statut",
         headerName: "Statut",
-        width: isMobile ? 100 : 260,
+        width: isMobile ? 100 : 150,
         renderCell: (params) => (
             <div style={{ color: statusColors[params.value] || "black" }}>
                 {params.value}
