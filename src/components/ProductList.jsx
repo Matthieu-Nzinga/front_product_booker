@@ -39,63 +39,62 @@ const columns = (
   handleActivateProduct,
   handleEditProduct
 ) => [
-    {
-      field: "category",
-      headerName: "Catégorie",
-      width: isMobile ? 100 : 150,
-    },
-    { field: "name", headerName: "Nom", width: isMobile ? 100 : 150 },
-    { field: "price", headerName: "Prix", width: isMobile ? 100 : 150 },
-    {
-      field: "quantity",
-      headerName: "Stock disponible",
-      width: isMobile ? 100 : 150,
-    },
-    {
-      field: "orderedQuantity",
-      headerName: "Quantité commandée",
-      width: isMobile ? 100 : 150,
-    },
-    {
-      field: "visualisation",
-      headerName: "Visualiser",
-      width: isMobile ? 250 : 150,
-      renderCell: (params) => (
-        <div>
-          <Tooltip title="Détails du produit">
-            <IconButton onClick={() => handleViewDetails(params.row)}>
-              <VisibilityIcon />
+  {
+    field: "category",
+    headerName: "Catégorie",
+    width: isMobile ? 100 : 150,
+  },
+  { field: "name", headerName: "Nom", width: isMobile ? 100 : 150 },
+  { field: "price", headerName: "Prix", width: isMobile ? 100 : 150 },
+  {
+    field: "quantity",
+    headerName: "Stock disponible",
+    width: isMobile ? 100 : 150,
+  },
+  {
+    field: "orderedQuantity",
+    headerName: "Quantité commandée",
+    width: isMobile ? 100 : 150,
+  },
+  {
+    field: "visualisation",
+    headerName: "Visualiser",
+    width: isMobile ? 250 : 150,
+    renderCell: (params) => (
+      <div>
+        <Tooltip title="Détails du produit">
+          <IconButton onClick={() => handleViewDetails(params.row)}>
+            <VisibilityIcon />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Modifier le produit">
+          <IconButton onClick={() => handleEditProduct(params.row)}>
+            <EditIcon style={{ fontSize: 20 }} />
+          </IconButton>
+        </Tooltip>
+        {params.row.statut ? (
+          <Tooltip title="Désactiver le produit" arrow>
+            <IconButton
+              onClick={() => handleDisableProduct(params.row.id)}
+              color="error"
+            >
+              <DisabledByDefaultIcon />
             </IconButton>
           </Tooltip>
-          <Tooltip title="Modifier le produit">
-            <IconButton onClick={() => handleEditProduct(params.row)}>
-              <EditIcon style={{ fontSize: 20 }} />
+        ) : (
+          <Tooltip title="Activer le produit" arrow>
+            <IconButton
+              onClick={() => handleActivateProduct(params.row.id)}
+              color="success"
+            >
+              <CheckCircleOutlineOutlinedIcon />
             </IconButton>
           </Tooltip>
-          {params.row.statut ? (
-            <Tooltip title="Désactiver le produit" arrow>
-              <IconButton
-                onClick={() => handleDisableProduct(params.row.id)}
-                color="error"
-              >
-                <DisabledByDefaultIcon />
-              </IconButton>
-            </Tooltip>
-          ) : (
-            <Tooltip title="Activer le produit" arrow>
-              <IconButton
-                onClick={() => handleActivateProduct(params.row.id)}
-                color="success"
-              >
-                <CheckCircleOutlineOutlinedIcon />
-              </IconButton>
-            </Tooltip>
-          )}
-        </div>
-      ),
-    },
-  ];
-
+        )}
+      </div>
+    ),
+  },
+];
 
 const ProductList = () => {
   const { product, categories, commands } = useSelector(
@@ -153,11 +152,13 @@ const ProductList = () => {
       };
     });
 
-
   // Filtrer les produits en fonction du terme de recherche et de la catégorie sélectionnée
   const filteredProducts = sortedProducts.filter((product) => {
-    const matchesCategory = selectedCategory === "" || product?.category === selectedCategory;
-    const matchesSearchTerm = product?.name?.toLowerCase().includes(searchTerm?.toLowerCase());
+    const matchesCategory =
+      selectedCategory === "" || product?.category === selectedCategory;
+    const matchesSearchTerm = product?.name
+      ?.toLowerCase()
+      .includes(searchTerm?.toLowerCase());
 
     return matchesCategory && matchesSearchTerm;
   });
@@ -220,12 +221,15 @@ const ProductList = () => {
       <h2 className="font-black text-3xl block md:hidden">Les produits</h2>
       <div className="flex flex-col md:flex-row gap-4 mb-4 items-center justify-between">
         <FormControl sx={{ minWidth: 130, width: 300, maxWidth: "300px" }}>
-          <InputLabel id="category-select-label">Filtrer par catégorie</InputLabel> {/* Ajoutez InputLabel ici */}
+          <InputLabel id="category-select-label">
+            Filtrer par catégorie
+          </InputLabel>{" "}
+          {/* Ajoutez InputLabel ici */}
           <Select
             labelId="category-select-label"
             value={selectedCategory}
             onChange={handleCategoryChange}
-            label="Filtrer par catégorie"  // Le texte est toujours utilisé ici comme attribut label
+            label="Filtrer par catégorie" // Le texte est toujours utilisé ici comme attribut label
           >
             <MenuItem value="">
               <em>Toutes les catégories</em>
@@ -248,8 +252,6 @@ const ProductList = () => {
           }}
         />
       </div>
-
-
 
       <Table
         columns={(isMobile) =>
@@ -296,7 +298,10 @@ const ProductList = () => {
             borderRadius: 1,
             boxShadow: 24,
             p: 2,
-            width: isMobile ? "90%" : "600px",
+            width: isMobile ? "90%" : "500px", // Réduit la largeur pour les écrans plus grands
+            maxWidth: "90vw", // Assure que la largeur ne dépasse pas 90% de la largeur de l'écran
+            maxHeight: "80vh", // Assure que le modal ne dépasse pas 80% de la hauteur de l'écran
+            overflowY: "auto", // Permet le défilement vertical si le contenu dépasse
           }}
         >
           <ProductForm
@@ -306,6 +311,7 @@ const ProductList = () => {
           />
         </Box>
       </Modal>
+
       {/* Modal pour afficher les détails du produit */}
       <Modal open={viewDetailsOpen} onClose={handleViewDetailsClose}>
         <Box
@@ -367,13 +373,15 @@ const ProductList = () => {
                   <strong>Nom :</strong> {selectedProduct.name}
                 </Typography>
                 <Typography variant="body1" className="mb-2">
-                  <strong>Quantité commandée :</strong> {selectedProduct.orderedQuantity}
+                  <strong>Quantité commandée :</strong>{" "}
+                  {selectedProduct.orderedQuantity}
                 </Typography>
                 <Typography variant="body1" className="mb-2">
                   <strong>Prix :</strong> {selectedProduct.price}
                 </Typography>
                 <Typography variant="body1" className="mb-2">
-                  <strong>Quantité en stock :</strong> {selectedProduct.quantity}
+                  <strong>Quantité en stock :</strong>{" "}
+                  {selectedProduct.quantity}
                 </Typography>
               </div>
             </div>
@@ -392,7 +400,7 @@ const ProductList = () => {
             borderRadius: 1,
             boxShadow: 24,
             p: 2,
-            width: isMobile ? "90%" : "600px",
+            width: isMobile ? "90%" : "400px",
           }}
         >
           <IconButton

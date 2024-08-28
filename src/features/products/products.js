@@ -58,6 +58,7 @@ export const getAllProduits = createAsyncThunk(
 export const postProduit = createAsyncThunk(
   "post/postProduit",
   async (data, thunkApi) => {
+   
     try {
       const response = await api.post(POST_PRODUCTS, data);
 
