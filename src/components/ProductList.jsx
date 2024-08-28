@@ -20,12 +20,13 @@ import EditIcon from "@mui/icons-material/Edit";
 import ProductForm from "./ProductForm";
 import ProductEditForm from "./ProductEditForm";
 import { useDispatch, useSelector } from "react-redux";
-import {
+import products, {
   activateProduct,
   getAllCategories,
   getAllCommands,
   getAllProduits,
   hideProduct,
+  ProductSale,
 } from "../features/products/products";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -111,6 +112,7 @@ const ProductList = () => {
   const [selectedCategory, setSelectedCategory] = useState(""); // État pour la catégorie sélectionnée
   const isMobile = useMediaQuery("(max-width: 640px)");
   const isTablet = useMediaQuery("(max-width: 768px)");
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     dispatch(getAllProduits());
@@ -165,8 +167,11 @@ const ProductList = () => {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  const handleViewDetails = (product) => {
-    setSelectedProduct(product);
+  const handleViewDetails = (one_product) => {
+    const detailsProduct = product?.find(
+      (details) => details.id === one_product.id
+    );
+    setSelectedProduct(detailsProduct);
     setActivePhotoIndex(0);
     setViewDetailsOpen(true);
   };
@@ -213,6 +218,20 @@ const ProductList = () => {
 
   const handleCategoryChange = (event) => {
     setSelectedCategory(event.target.value);
+  };
+
+  const handleFeatureProduct = async () => {
+    setIsLoading(true); // Active le chargement
+    try {
+      await dispatch(ProductSale(selectedProduct.id));
+      toast.success("Produit mis à la une avec succès");
+      dispatch(getAllProduits());
+      setViewDetailsOpen(false); // Ferme le modal si l'opération réussit
+    } catch (error) {
+      toast.error("Échec de modification");
+    } finally {
+      setIsLoading(false); // Désactive le chargement après l'opération
+    }
   };
 
   return (
@@ -370,20 +389,29 @@ const ProductList = () => {
 
                 {/* Display additional product details */}
                 <Typography variant="body1" className="mb-2">
-                  <strong>Nom :</strong> {selectedProduct.name}
-                </Typography>
-                <Typography variant="body1" className="mb-2">
-                  <strong>Quantité commandée :</strong>{" "}
-                  {selectedProduct.orderedQuantity}
-                </Typography>
-                <Typography variant="body1" className="mb-2">
-                  <strong>Prix :</strong> {selectedProduct.price}
+                  <strong>Nom :</strong> {selectedProduct.nom_produit}
                 </Typography>
                 <Typography variant="body1" className="mb-2">
                   <strong>Quantité en stock :</strong>{" "}
-                  {selectedProduct.quantity}
+                  {selectedProduct.quantite_en_stock}
+                </Typography>
+                <Typography variant="body1" className="mb-2">
+                  <strong>Prix :</strong> {selectedProduct.prix_par_unite}€
                 </Typography>
               </div>
+            </div>
+          )}
+          {/* Add the button at the end of the modal */}
+          {!selectedProduct?.enSolde && (
+            <div className="flex flex-col items-center mt-4">
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleFeatureProduct}
+                disabled={isLoading} // Désactive le bouton pendant le chargement
+              >
+                {isLoading ? "En cours..." : "Marquer comme produit à la une"}
+              </Button>
             </div>
           )}
         </Box>
