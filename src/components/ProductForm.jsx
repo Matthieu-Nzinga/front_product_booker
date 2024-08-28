@@ -1,18 +1,35 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Box, Button, TextField, IconButton, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
+import {
+  Box,
+  Button,
+  TextField,
+  IconButton,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+} from "@mui/material";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { ToastContainer, toast } from "react-toastify";
 import { useDispatch } from "react-redux";
-import { postProduit, getAllProduits } from "../features/products/products"; 
+import { postProduit, getAllProduits } from "../features/products/products";
 
 const ProductForm = ({ onClose, category }) => {
   const [imageUrls, setImageUrls] = useState([]);
-  const [selectedFileName, setSelectedFileName] = useState('');
+  const [deletedImages, setDeletedImages] = useState([]); // Nouveau état pour les images supprimées
+  const [selectedFileName, setSelectedFileName] = useState("");
   const dispatch = useDispatch();
-  const { register, handleSubmit,reset, formState: { errors }, setValue } = useForm();
-  
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+    setValue,
+  } = useForm();
+  const [isUpdating, setIsUpdating] = useState(false);
+
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -26,43 +43,57 @@ const ProductForm = ({ onClose, category }) => {
 
     try {
       const formData = new FormData();
-      formData.append('file', file);
-      formData.append('upload_preset', 'myImage');
+      formData.append("file", file);
+      formData.append("upload_preset", "myImage");
 
       const response = await fetch(
-        'https://api.cloudinary.com/v1_1/deuutxkyz/image/upload',
+        "https://api.cloudinary.com/v1_1/deuutxkyz/image/upload",
         {
-          method: 'POST',
+          method: "POST",
           body: formData,
         }
       );
 
       const cloudinaryData = await response.json();
-      setImageUrls(prevUrls => [...prevUrls, cloudinaryData.secure_url]);
-      setSelectedFileName('');
+      setImageUrls((prevUrls) => [...prevUrls, cloudinaryData.secure_url]);
+      setSelectedFileName("");
     } catch (error) {
       console.error("Erreur lors du téléchargement de l'image :", error);
     }
   };
 
   const handleDeleteImage = (index) => {
-    setImageUrls(prevUrls => prevUrls.filter((_, i) => i !== index));
+    setDeletedImages((prevDeleted) => [
+      ...prevDeleted,
+      imageUrls[index], // Ajoute l'URL de l'image supprimée à la liste des images supprimées
+    ]);
+    setImageUrls((prevUrls) => prevUrls.filter((_, i) => i !== index));
+  };
+
+  const handleReaddImage = (url) => {
+    setImageUrls((prevUrls) => [...prevUrls, url]);
+    setDeletedImages((prevDeleted) =>
+      prevDeleted.filter((deletedUrl) => deletedUrl !== url)
+    );
   };
 
   const handleFormSubmit = async (data) => {
+    setIsUpdating(true);
     const formDataWithImages = {
       ...data,
-      urlsPhotos: imageUrls, 
+      urlsPhotos: imageUrls,
     };
 
     try {
       await dispatch(postProduit(formDataWithImages)).unwrap();
       toast.success("Produit ajouté avec succès");
-      reset()
-      dispatch(getAllProduits()); 
-      if (onClose) onClose(); 
+      reset();
+      dispatch(getAllProduits());
+      if (onClose) onClose();
     } catch (error) {
       toast.error("Échec de la création du produit");
+    } finally {
+      setIsUpdating(false); // Fin du chargement
     }
   };
 
@@ -70,13 +101,13 @@ const ProductForm = ({ onClose, category }) => {
     <Box
       component="form"
       onSubmit={handleSubmit(handleFormSubmit)}
-      sx={{ 
-        display: "flex", 
-        flexDirection: "column", 
+      sx={{
+        display: "flex",
+        flexDirection: "column",
         gap: 2,
-        maxHeight: '80vh',
-        overflowY: 'auto',
-        padding: '16px'
+        maxHeight: "80vh",
+        overflowY: "auto",
+        padding: "16px",
       }}
     >
       <TextField
@@ -86,7 +117,7 @@ const ProductForm = ({ onClose, category }) => {
         helperText={errors.nom_produit?.message}
         fullWidth
       />
-      
+
       <FormControl fullWidth>
         <InputLabel id="category-label">Type de produit</InputLabel>
         <Select
@@ -101,7 +132,9 @@ const ProductForm = ({ onClose, category }) => {
             </MenuItem>
           ))}
         </Select>
-        {errors.categorie_id && <p className="text-red-700">{errors.categorie_id.message}</p>}
+        {errors.categorie_id && (
+          <p className="text-red-700">{errors.categorie_id.message}</p>
+        )}
       </FormControl>
 
       <Box
@@ -115,9 +148,7 @@ const ProductForm = ({ onClose, category }) => {
           width: "100%",
         }}
       >
-        <span>
-          {selectedFileName || "Aucune image sélectionnée"}
-        </span>
+        <span>{selectedFileName || "Aucune image sélectionnée"}</span>
         <IconButton component="label">
           <input
             type="file"
@@ -135,13 +166,28 @@ const ProductForm = ({ onClose, category }) => {
           Ajouter une autre image
         </Button>
 
-        <Box sx={{ display: "flex", flexDirection: "row", gap: 1, flexWrap: "wrap" }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "row",
+            gap: 1,
+            flexWrap: "wrap",
+          }}
+        >
           {imageUrls.map((url, index) => (
-            <Box key={index} sx={{ position: "relative", display: "inline-block" }}>
+            <Box
+              key={index}
+              sx={{ position: "relative", display: "inline-block" }}
+            >
               <img
                 src={url}
                 alt={`Preview ${index}`}
-                style={{ width: "100px", height: "100px", objectFit: "cover", borderRadius: "4px" }}
+                style={{
+                  width: "100px",
+                  height: "100px",
+                  objectFit: "cover",
+                  borderRadius: "4px",
+                }}
               />
               <IconButton
                 onClick={() => handleDeleteImage(index)}
@@ -159,8 +205,50 @@ const ProductForm = ({ onClose, category }) => {
             </Box>
           ))}
         </Box>
+
+        {/* Affichage des images supprimées avec option de réajout */}
+        {deletedImages.length > 0 && (
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "row",
+              gap: 1,
+              flexWrap: "wrap",
+              marginTop: 2,
+              borderTop: "1px solid #ccc",
+              paddingTop: 2,
+            }}
+          >
+            <h4>Images supprimées</h4>
+            {deletedImages.map((url, index) => (
+              <Box
+                key={index}
+                sx={{ position: "relative", display: "inline-block" }}
+              >
+                <img
+                  src={url}
+                  alt={`Deleted ${index}`}
+                  style={{
+                    width: "100px",
+                    height: "100px",
+                    objectFit: "cover",
+                    borderRadius: "4px",
+                  }}
+                />
+                <Button
+                  onClick={() => handleReaddImage(url)}
+                  variant="contained"
+                  color="primary"
+                  sx={{ position: "absolute", bottom: 0, left: 0 }}
+                >
+                  Réajouter
+                </Button>
+              </Box>
+            ))}
+          </Box>
+        )}
       </Box>
-      
+
       <TextField
         label="Prix"
         type="text"
@@ -168,9 +256,12 @@ const ProductForm = ({ onClose, category }) => {
           required: "Prix est requis",
           validate: (value) => {
             const parsedValue = parseFloat(value);
-            return !isNaN(parsedValue) || "Le prix doit être un nombre décimal valide";
+            return (
+              !isNaN(parsedValue) ||
+              "Le prix doit être un nombre décimal valide"
+            );
           },
-          setValueAs: (value) => parseFloat(value)
+          setValueAs: (value) => parseFloat(value),
         })}
         error={!!errors.prix_par_unite}
         helperText={errors.prix_par_unite ? errors.prix_par_unite.message : ""}
@@ -185,10 +276,12 @@ const ProductForm = ({ onClose, category }) => {
           validate: (value) => {
             const isInteger = Number.isInteger(value);
             return isInteger || "La quantité doit être un entier";
-          }
+          },
         })}
         error={!!errors.quantite_en_stock}
-        helperText={errors.quantite_en_stock ? errors.quantite_en_stock.message : ""}
+        helperText={
+          errors.quantite_en_stock ? errors.quantite_en_stock.message : ""
+        }
       />
 
       <TextField
@@ -202,8 +295,13 @@ const ProductForm = ({ onClose, category }) => {
       />
 
       <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Button type="submit" variant="contained" color="primary">
-          AJOUTER LE PRODUIT
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          disabled={isUpdating}
+        >
+          {isUpdating ? "Ajout du produit en cours..." : "AJOUTER LE PRODUIT"}
         </Button>
         <Button type="button" onClick={onClose} variant="outlined">
           Fermer
