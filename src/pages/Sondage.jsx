@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { getAllSondages } from "../features/products/products";
 import Table from "../components/Table";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import SondageDetailsModal from "../components/SondageDetailsModal";
 
 // Définir les colonnes de la table comme une fonction
@@ -50,7 +50,6 @@ const Sondage = () => {
     setSelectedSondage(sondage);
     setDetailsOpen(true);
   };
-
   const handleCloseDetails = () => {
     setSelectedSondage(null);
     setDetailsOpen(false);
@@ -65,18 +64,22 @@ const Sondage = () => {
     dispatch(getAllSondages());
   }, [dispatch]);
 
-  
   // Préparer les données pour la table
-  const rows = sondages.map((sondage) => ({
-    id: sondage.id,
-    nom_produit: sondage.nom_produit,
-    description: sondage.description,
-    question: sondage.question,
-    createdAt: sondage.createdAt
-      ? format(new Date(sondage.createdAt), "dd/MM/yyyy")
-      : "N/A",
-  }));
-
+  const rows = sondages
+    .map((sondage) => ({
+      id: sondage.id,
+      nom_produit: sondage.nom_produit,
+      description: sondage.description,
+      question: sondage.question,
+      createdAt: sondage.createdAt, // Garder la date au format ISO pour le tri
+    }))
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // Trier les sondages du plus récent au plus ancien en tenant compte de l'heure
+    .map((sondage) => ({
+      ...sondage,
+      createdAt: sondage.createdAt
+        ? format(parseISO(sondage.createdAt), "dd/MM/yyyy HH:mm") // Formatage pour affichage avec l'heure
+        : "N/A",
+    }));
   return (
     <div>
       <Header text={"Les Sondages"} />
@@ -121,11 +124,14 @@ const Sondage = () => {
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: 400,
+            width: { xs: '90%', sm: 400 }, // Responsiveness
+            maxHeight: '90vh', // Ensure it doesn't exceed viewport height
+            minHeight: '200px', // Ensure the modal has a minimum height
             bgcolor: "background.paper",
             borderRadius: 2,
             boxShadow: 24,
             p: 4,
+            overflowY: 'auto', // Enable vertical scroll if needed
           }}
         >
           <SondageForm handleClose={handleClose} title="Créer un sondage" />
