@@ -1,12 +1,15 @@
 import React from 'react'
 import { DataGrid } from "@mui/x-data-grid";
 
-const Table = ({columns, rows, isMobile}) => {
+const Table = ({ columns, rows, isMobile }) => {
+  // Appel de la fonction columns avec les paramètres nécessaires
+  const columnsToDisplay = columns(isMobile);
+
   return (
     <div>
-        <DataGrid
+      <DataGrid
         rows={rows}
-        columns={columns(isMobile)}
+        columns={columnsToDisplay}
         getRowId={(row) => row.id}
         initialState={{
           pagination: {
