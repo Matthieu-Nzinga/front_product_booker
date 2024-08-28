@@ -6,7 +6,7 @@ import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { jwtDecode } from "jwt-decode";
 import { useDispatch } from "react-redux";
-import { postSondage } from "../features/products/products";
+import { getAllSondages, postSondage } from "../features/products/products";
 import { toast } from "react-toastify";
 
 const SondageForm = ({ handleClose, title }) => {
@@ -71,6 +71,7 @@ const SondageForm = ({ handleClose, title }) => {
     try {
       await dispatch(postSondage(formDataWithImages)).unwrap();
       toast.success("Sondage créé avec succès");
+      dispatch(getAllSondages())
       handleClose(); // Ferme le modal après soumission
     } catch (error) {
       toast.error("Erreur lors de la création du sondage");
