@@ -21,6 +21,7 @@ import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import DetailsProduct from "./pages/DetailsProduct";
 import Commands from "./pages/Commands";
 import Sondage from "./pages/Sondage";
+import ShowSondage from "./pages/ShowSondage";
 
 
 const unAuthRoutes = [
@@ -83,6 +84,10 @@ const clientRoutes = [
       {
         path: "panier",
         element: <Basket />,
+      },
+      {
+        path: "showSondage",
+        element: <ShowSondage />,
       },
       {
         path: "product/:id", // Ajout de la route pour afficher les détails d'un produit
