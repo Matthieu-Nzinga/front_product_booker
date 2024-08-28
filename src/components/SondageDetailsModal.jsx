@@ -26,6 +26,12 @@ const SondageDetailsModal = ({ sondage, open, onClose }) => {
 
   if (!sondage) return null;
 
+  // Calculer le nombre total de réponses et la répartition entre "Pour" et "Contre"
+  const totalResponses = sondage.reponses?.length || 0;
+  const countFor =
+    sondage.reponses?.filter((r) => r.reponse === true).length || 0;
+  const countAgainst = totalResponses - countFor;
+
   const handlePhotoClick = (index) => {
     setSelectedPhotoIndex(index);
   };
@@ -47,7 +53,7 @@ const SondageDetailsModal = ({ sondage, open, onClose }) => {
       };
       try {
         await dispatch(postReponse(responseObject)); // Attendre que l'action soit terminée
-        dispatch(getAllSondages())
+        dispatch(getAllSondages());
         toast.success("Merci d'avoir participé à ce sondage"); // Afficher le toast
       } catch (error) {
         toast.error("Une erreur est survenue. Veuillez réessayer."); // Afficher un toast en cas d'erreur
@@ -86,6 +92,13 @@ const SondageDetailsModal = ({ sondage, open, onClose }) => {
           <CloseIcon />
         </IconButton>
 
+        {/* Display number of responses and distribution */}
+        {sondage.reponses && sondage.reponses.length > 0 && (
+          <p>
+            Pour ce produit, il y a {totalResponses} personne(s) qui ont répondu
+            : {countFor} <strong> oui </strong> et {countAgainst} <strong>non.</strong>
+          </p>
+        )}
         {/* Display title based on user role */}
         {sondage.user.role === "Client" ? (
           <h2>
