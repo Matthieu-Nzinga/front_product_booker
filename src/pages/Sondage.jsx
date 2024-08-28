@@ -7,15 +7,16 @@ import { getAllSondages } from "../features/products/products";
 import Table from "../components/Table";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { format } from "date-fns";
+import SondageDetailsModal from "../components/SondageDetailsModal";
 
 // Définir les colonnes de la table comme une fonction
 const getColumns = (handleViewDetails, isMobile) => [
-  { field: 'nom_produit', headerName: 'Nom du produit', width: 200 },
-  { field: 'description', headerName: 'Description', width: 200 },
-  { field: 'question', headerName: 'Question', width: 250 },
+  { field: "nom_produit", headerName: "Nom du produit", width: 200 },
+  { field: "description", headerName: "Description", width: 200 },
+  { field: "question", headerName: "Question", width: 250 },
   {
-    field: 'createdAt',
-    headerName: 'Date',
+    field: "createdAt",
+    headerName: "Date",
     width: 200,
   },
   {
@@ -42,6 +43,24 @@ const Sondage = () => {
   const dispatch = useDispatch();
   const isMobile = useMediaQuery("(max-width: 640px)");
 
+  const [selectedSondage, setSelectedSondage] = useState(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+
+  const handleOpenDetails = (sondage) => {
+    setSelectedSondage(sondage);
+    setDetailsOpen(true);
+  };
+
+  const handleCloseDetails = () => {
+    setSelectedSondage(null);
+    setDetailsOpen(false);
+  };
+
+  const handleViewDetails = (sondagedet) => {
+    const detailsSondage = sondages.find(sondage => sondage.id === sondagedet.id)
+    handleOpenDetails(detailsSondage);
+  };
+
   useEffect(() => {
     dispatch(getAllSondages());
   }, [dispatch]);
@@ -52,13 +71,9 @@ const Sondage = () => {
     description: sondage.description,
     question: sondage.question,
     createdAt: sondage.createdAt
-    ? format(new Date(sondage.createdAt), "dd/MM/yyyy")
-    : "N/A",
+      ? format(new Date(sondage.createdAt), "dd/MM/yyyy")
+      : "N/A",
   }));
-
-  const handleViewDetails = (product) => {
-    // Implémentez la logique pour afficher les détails du produit
-  };
 
   return (
     <div>
@@ -72,7 +87,7 @@ const Sondage = () => {
             Créer un sondage
           </button>
         </div>
-        
+
         <Table
           rows={rows}
           columns={() => getColumns(handleViewDetails, isMobile)} // Appel de la fonction pour obtenir les colonnes
@@ -89,6 +104,11 @@ const Sondage = () => {
               padding: isMobile ? "4px" : "8px",
             },
           }}
+        />
+        <SondageDetailsModal
+          sondage={selectedSondage}
+          open={detailsOpen}
+          onClose={handleCloseDetails}
         />
       </div>
 
