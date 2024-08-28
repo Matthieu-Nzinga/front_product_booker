@@ -172,6 +172,19 @@ export const postSondage = createAsyncThunk(
     }
   }
 ); 
+export const getAllSondages = createAsyncThunk(
+  "get/getAllSondages",
+  async ( thunkApi) => {
+    try {
+     
+      const response = await api.get();
+    
+     return response.data;
+    } catch (error) {
+      return thunkApi.rejectWithValue(error);
+    }
+  }
+);
 const initialState = {
   product: [],
   categories: [],

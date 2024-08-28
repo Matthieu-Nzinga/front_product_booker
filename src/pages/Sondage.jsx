@@ -37,7 +37,7 @@ const Sondage = () => {
             p: 4,
           }}
         >
-          <SondageForm handleClose={handleClose} />
+          <SondageForm handleClose={handleClose} title="Créer un sondage" />
         </Box>
       </Modal>
     </div>
