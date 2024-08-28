@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { TextField, Button, IconButton, Box } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 
 
@@ -68,7 +69,7 @@ const SondageForm = ({ handleClose }) => {
       </div>
       <TextField
         fullWidth
-        label="Nom"
+        label="Nom du produit"
         variant="outlined"
         margin="normal"
         {...register("nom_produit", { required: "Le nom du produit est requis" })}

@@ -11,7 +11,7 @@ const Sondage = () => {
 
   return (
     <div>
-      <Header text={"Sondage"} />
+      <Header text={"Les Sondages"} />
       <div className="px-8">
         <div className="flex justify-end">
           <button
