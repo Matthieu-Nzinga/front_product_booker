@@ -83,7 +83,7 @@ const SidBar = () => {
               }
             >
               <li className="flex items-center gap-2 p-3">
-              <RiSurveyLine size={25}/> Sondage
+              <RiSurveyLine size={25}/> Sondages
               </li>
             </NavLink>
             
