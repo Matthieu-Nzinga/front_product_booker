@@ -7,6 +7,7 @@ import {
   HIDE_PRODUCT,
   POST_COMMANDS,
   POST_PRODUCTS,
+  POST_REPONSE,
   POST_SONDAGE,
   PRODUCTS,
   PUT_COMMANDS,
@@ -161,6 +162,18 @@ export const updateCommand = createAsyncThunk(
     }
   }
 );
+export const postReponse = createAsyncThunk(
+  "post/postReponse",
+  async (data, thunkApi) => {
+    try {
+      const response = await api.post(POST_REPONSE, data);
+    return response.data.reponseSondage;
+    } catch (error) {
+      console.log(error)
+      return thunkApi.rejectWithValue(error);
+    }
+  }
+); 
 export const postSondage = createAsyncThunk(
   "post/postSondage",
   async (data, thunkApi) => {
@@ -343,6 +356,17 @@ const products = createSlice({
         state.status = "succeeded";
       })
       .addCase(getAllSondages.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      })
+      .addCase(postReponse.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(postReponse.fulfilled, (state, action) => {
+        
+        state.error = null;
+      })
+      .addCase(postReponse.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.error.message;
       })
