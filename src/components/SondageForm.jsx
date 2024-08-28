@@ -9,7 +9,7 @@ import { useDispatch } from "react-redux";
 import { postSondage } from "../features/products/products";
 import { toast } from "react-toastify";
 
-const SondageForm = ({ handleClose }) => {
+const SondageForm = ({ handleClose, title }) => {
   const [imageUrls, setImageUrls] = useState([]);
   const [selectedFileName, setSelectedFileName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -82,7 +82,7 @@ const SondageForm = ({ handleClose }) => {
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold">Créer un sondage</h2>
+        <h2 className="text-lg font-semibold">{title}</h2>
         <IconButton onClick={handleClose}>
           <CloseIcon />
         </IconButton>
