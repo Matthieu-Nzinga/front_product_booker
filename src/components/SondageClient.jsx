@@ -1,15 +1,14 @@
 import React, { useEffect, useState } from "react";
-import Header from "../components/Header";
-import { Modal, Box, useMediaQuery, Tooltip, IconButton } from "@mui/material";
-import SondageForm from "../components/SondageForm"; // Assurez-vous que le chemin est correct
 import { useDispatch, useSelector } from "react-redux";
 import { getAllSondages } from "../features/products/products";
-import Table from "../components/Table";
-import VisibilityIcon from "@mui/icons-material/Visibility";
+import Table from "./Table";
 import { format } from "date-fns";
-import SondageDetailsModal from "../components/SondageDetailsModal";
+import { IconButton, Tooltip, useMediaQuery, Typography } from "@mui/material";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import SondageDetailsModal from "./SondageDetailsModal";
+import { ToastContainer } from "react-toastify";
+import { jwtDecode } from "jwt-decode";
 
-// Définir les colonnes de la table comme une fonction
 const getColumns = (handleViewDetails, isMobile) => [
   { field: "nom_produit", headerName: "Nom du produit", width: 200 },
   { field: "description", headerName: "Description", width: 200 },
@@ -35,16 +34,20 @@ const getColumns = (handleViewDetails, isMobile) => [
   },
 ];
 
-const Sondage = () => {
-  const { sondages } = useSelector((state) => state.products);
-  const [open, setOpen] = useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+const SondageClient = () => {
+  const { sondages } = useSelector((state) => state.products) || [];
   const dispatch = useDispatch();
   const isMobile = useMediaQuery("(max-width: 640px)");
 
   const [selectedSondage, setSelectedSondage] = useState(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const token = localStorage.getItem("token");
+  const decodedToken = jwtDecode(token);
+  const userId = decodedToken.id;
+
+  useEffect(() => {
+    dispatch(getAllSondages());
+  }, [dispatch]);
 
   const handleOpenDetails = (sondage) => {
     setSelectedSondage(sondage);
@@ -57,17 +60,22 @@ const Sondage = () => {
   };
 
   const handleViewDetails = (sondagedet) => {
-    const detailsSondage = sondages.find(sondage => sondage.id === sondagedet.id)
+    const detailsSondage = sondages.find(sondage => sondage.id === sondagedet.id);
     handleOpenDetails(detailsSondage);
   };
 
-  useEffect(() => {
-    dispatch(getAllSondages());
-  }, [dispatch]);
+  // Filtrer les sondages pour n'afficher que ceux dont l'utilisateur n'a pas encore répondu
+  // et où le sondage est associé à un utilisateur dont le role est Admin et userId est différent
+  const filteredSondages = sondages.filter((sondage) => {
+    return (
+      sondage?.reponses?.every(response => response.userId !== userId) &&
+      sondage.user.userId !== userId &&
+      sondage.user.role === "Admin"
+    );
+  });
 
-  
   // Préparer les données pour la table
-  const rows = sondages.map((sondage) => ({
+  const rows = filteredSondages.map((sondage) => ({
     id: sondage.id,
     nom_produit: sondage.nom_produit,
     description: sondage.description,
@@ -78,18 +86,16 @@ const Sondage = () => {
   }));
 
   return (
-    <div>
-      <Header text={"Les Sondages"} />
-      <div className="px-8">
-        <div className="flex justify-end">
-          <button
-            className="text-center mb-4 font-semibold text-base bg-customBlue px-[93px] text-white py-3 hover:bg-blue-600 mt-28 rounded-xl"
-            onClick={handleOpen}
-          >
-            Créer un sondage
-          </button>
-        </div>
-
+    <div className="w-90">
+      <ToastContainer />
+      <h1 className="font-black text-3xl sm:text-4xl lg:text-5xl my-5 sm:my-7">
+        Les sondages
+      </h1>
+      {filteredSondages.length === 0 ? (
+        <Typography variant="h6" color="textSecondary" align="center">
+          Il n'y a pas un nouveau sondage pour l'instant. Merci !
+        </Typography>
+      ) : (
         <Table
           rows={rows}
           columns={() => getColumns(handleViewDetails, isMobile)} // Appel de la fonction pour obtenir les colonnes
@@ -107,32 +113,14 @@ const Sondage = () => {
             },
           }}
         />
-        <SondageDetailsModal
-          sondage={selectedSondage}
-          open={detailsOpen}
-          onClose={handleCloseDetails}
-        />
-      </div>
-
-      <Modal open={open} onClose={handleClose}>
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: 400,
-            bgcolor: "background.paper",
-            borderRadius: 2,
-            boxShadow: 24,
-            p: 4,
-          }}
-        >
-          <SondageForm handleClose={handleClose} title="Créer un sondage" />
-        </Box>
-      </Modal>
+      )}
+      <SondageDetailsModal
+        sondage={selectedSondage}
+        open={detailsOpen}
+        onClose={handleCloseDetails}
+      />
     </div>
   );
 };
 
-export default Sondage;
+export default SondageClient;

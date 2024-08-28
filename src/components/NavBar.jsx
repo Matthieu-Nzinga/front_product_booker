@@ -36,7 +36,7 @@ const NavBar = () => {
         <div className="w-20">
           {/* <img src={logoImg} alt="Logo" className="w-full h-auto" /> */}
         </div>
-        <ul className="hidden md:flex items-center gap-4 font-semibold text-base">
+        <ul className="hidden md:flex items-center gap-5 font-semibold text-base">
           <li>
             <NavLink to="">Produits</NavLink>
           </li>
@@ -45,6 +45,9 @@ const NavBar = () => {
           </li>
           <li>
             <NavLink to="panier">Mon panier</NavLink>
+          </li>
+          <li>
+            <NavLink to="showSondage">Voir les sondages</NavLink>
           </li>
           <li>
             <button onClick={() => setIsModalOpen(true)}>Suggérer un produit</button>
