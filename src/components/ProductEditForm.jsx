@@ -90,9 +90,8 @@ const ProductEditForm = ({ product, category, onClose }) => {
       dispatch(getAllProduits());
       onClose();
     } catch (error) {
-      // Affichage du message d'erreur en cas d'échec
-      console.error("Erreur lors du traitement des images :", error);
-      toast.error("Échec de la modification du produit");
+      // Affichage du message d'erreur en cas d'échec;
+      toast.error("Échec de la modification du produit").unwrap();
     }
   };
   
