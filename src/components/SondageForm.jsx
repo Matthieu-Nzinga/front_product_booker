@@ -3,13 +3,25 @@ import { useForm } from "react-hook-form";
 import { TextField, Button, IconButton, Box } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { jwtDecode } from "jwt-decode";
+import { useDispatch } from "react-redux";
+import { getAllSondages, postSondage } from "../features/products/products";
+import { toast } from "react-toastify";
 
-
-
-const SondageForm = ({ handleClose }) => {
-    const [imageUrls, setImageUrls] = useState([]);
-  const [selectedFileName, setSelectedFileName] = useState('');
-  const { register, handleSubmit, formState: { errors } } = useForm();
+const SondageForm = ({ handleClose, title }) => {
+  const [imageUrls, setImageUrls] = useState([]);
+  const [selectedFileName, setSelectedFileName] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+  const token = localStorage.getItem("token");
+  const decodedToken = jwtDecode(token);
+  const userId = decodedToken.id;
+  const dispatch = useDispatch();
 
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
@@ -24,54 +36,66 @@ const SondageForm = ({ handleClose }) => {
 
     try {
       const formData = new FormData();
-      formData.append('file', file);
-      formData.append('upload_preset', 'myImage');
+      formData.append("file", file);
+      formData.append("upload_preset", "myImage");
 
       const response = await fetch(
-        'https://api.cloudinary.com/v1_1/deuutxkyz/image/upload',
+        "https://api.cloudinary.com/v1_1/deuutxkyz/image/upload",
         {
-          method: 'POST',
+          method: "POST",
           body: formData,
         }
       );
 
       const cloudinaryData = await response.json();
-      setImageUrls(prevUrls => [...prevUrls, cloudinaryData.secure_url]);
-      setSelectedFileName('');
+      setImageUrls((prevUrls) => [...prevUrls, cloudinaryData.secure_url]);
+      setSelectedFileName("");
     } catch (error) {
       console.error("Erreur lors du téléchargement de l'image :", error);
+      toast.error("Erreur lors du téléchargement de l'image");
     }
   };
 
   const handleDeleteImage = (index) => {
-    setImageUrls(prevUrls => prevUrls.filter((_, i) => i !== index));
+    setImageUrls((prevUrls) => prevUrls.filter((_, i) => i !== index));
   };
 
-  
-
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
+    setIsSubmitting(true);
     const formDataWithImages = {
-        ...data,
-        urlsPhotos: imageUrls, 
-      };
-    console.log(data); // Vous pouvez traiter les données du formulaire ici
-    handleClose(); // Ferme le modal après soumission
+      ...data,
+      urlsPhotos: imageUrls,
+      userId,
+    };
+
+    try {
+      await dispatch(postSondage(formDataWithImages)).unwrap();
+      toast.success("Sondage créé avec succès");
+      dispatch(getAllSondages())
+      handleClose(); // Ferme le modal après soumission
+    } catch (error) {
+      toast.error("Erreur lors de la création du sondage");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold">Créer un sondage</h2>
+        <h2 className="text-lg font-semibold">{title}</h2>
         <IconButton onClick={handleClose}>
           <CloseIcon />
         </IconButton>
       </div>
       <TextField
         fullWidth
-        label="Nom"
+        label="Nom du produit"
         variant="outlined"
         margin="normal"
-        {...register("nom_produit", { required: "Le nom du produit est requis" })}
+        {...register("nom_produit", {
+          required: "Le nom du produit est requis",
+        })}
         error={!!errors.nom_produit}
         helperText={errors.nom_produit ? errors.nom_produit.message : ""}
       />
@@ -80,7 +104,7 @@ const SondageForm = ({ handleClose }) => {
         label="Description"
         variant="outlined"
         margin="normal"
-        {...register("description", { required: "Le Description est requis" })}
+        {...register("description", { required: "La Description est requise" })}
         error={!!errors.description}
         helperText={errors.description ? errors.description.message : ""}
       />
@@ -89,7 +113,7 @@ const SondageForm = ({ handleClose }) => {
         label="Question"
         variant="outlined"
         margin="normal"
-        {...register("question", { required: "La Question est requis" })}
+        {...register("question", { required: "La Question est requise" })}
         error={!!errors.question}
         helperText={errors.question ? errors.question.message : ""}
       />
@@ -104,9 +128,7 @@ const SondageForm = ({ handleClose }) => {
           width: "100%",
         }}
       >
-        <span>
-          {selectedFileName || "Aucune image sélectionnée"}
-        </span>
+        <span>{selectedFileName || "Aucune image sélectionnée"}</span>
         <IconButton component="label">
           <input
             type="file"
@@ -124,13 +146,28 @@ const SondageForm = ({ handleClose }) => {
           Ajouter une autre image
         </Button>
 
-        <Box sx={{ display: "flex", flexDirection: "row", gap: 1, flexWrap: "wrap" }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "row",
+            gap: 1,
+            flexWrap: "wrap",
+          }}
+        >
           {imageUrls.map((url, index) => (
-            <Box key={index} sx={{ position: "relative", display: "inline-block" }}>
+            <Box
+              key={index}
+              sx={{ position: "relative", display: "inline-block" }}
+            >
               <img
                 src={url}
                 alt={`Preview ${index}`}
-                style={{ width: "100px", height: "100px", objectFit: "cover", borderRadius: "4px" }}
+                style={{
+                  width: "100px",
+                  height: "100px",
+                  objectFit: "cover",
+                  borderRadius: "4px",
+                }}
               />
               <IconButton
                 onClick={() => handleDeleteImage(index)}
@@ -154,8 +191,9 @@ const SondageForm = ({ handleClose }) => {
           type="submit"
           variant="contained"
           color="primary"
+          disabled={isSubmitting}
         >
-          Enregistrer
+          {isSubmitting ? "Enregistrement en cours" : "Enregistrer"}
         </Button>
       </div>
     </form>

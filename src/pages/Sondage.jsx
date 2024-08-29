@@ -1,17 +1,88 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Header from "../components/Header";
-import { Modal, Box } from "@mui/material";
+import { Modal, Box, useMediaQuery, Tooltip, IconButton } from "@mui/material";
 import SondageForm from "../components/SondageForm"; // Assurez-vous que le chemin est correct
+import { useDispatch, useSelector } from "react-redux";
+import { getAllSondages } from "../features/products/products";
+import Table from "../components/Table";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import { format, parseISO } from "date-fns";
+import SondageDetailsModal from "../components/SondageDetailsModal";
+
+// Définir les colonnes de la table comme une fonction
+const getColumns = (handleViewDetails, isMobile) => [
+  { field: "nom_produit", headerName: "Nom du produit", width: 200 },
+  { field: "description", headerName: "Description", width: 200 },
+  { field: "question", headerName: "Question", width: 250 },
+  {
+    field: "createdAt",
+    headerName: "Date",
+    width: 200,
+  },
+  {
+    field: "visualisation",
+    headerName: "Visualiser",
+    width: isMobile ? 250 : 150,
+    renderCell: (params) => (
+      <div>
+        <Tooltip title="Détails sur le sondage">
+          <IconButton onClick={() => handleViewDetails(params.row)}>
+            <VisibilityIcon />
+          </IconButton>
+        </Tooltip>
+      </div>
+    ),
+  },
+];
 
 const Sondage = () => {
+  const { sondages } = useSelector((state) => state.products);
   const [open, setOpen] = useState(false);
-
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+  const dispatch = useDispatch();
+  const isMobile = useMediaQuery("(max-width: 640px)");
 
+  const [selectedSondage, setSelectedSondage] = useState(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+
+  const handleOpenDetails = (sondage) => {
+    setSelectedSondage(sondage);
+    setDetailsOpen(true);
+  };
+  const handleCloseDetails = () => {
+    setSelectedSondage(null);
+    setDetailsOpen(false);
+  };
+
+  const handleViewDetails = (sondagedet) => {
+    const detailsSondage = sondages.find(sondage => sondage.id === sondagedet.id)
+    handleOpenDetails(detailsSondage);
+  };
+
+  useEffect(() => {
+    dispatch(getAllSondages());
+  }, [dispatch]);
+
+  // Préparer les données pour la table
+  const rows = sondages
+    .map((sondage) => ({
+      id: sondage.id,
+      nom_produit: sondage.nom_produit,
+      description: sondage.description,
+      question: sondage.question,
+      createdAt: sondage.createdAt, // Garder la date au format ISO pour le tri
+    }))
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // Trier les sondages du plus récent au plus ancien en tenant compte de l'heure
+    .map((sondage) => ({
+      ...sondage,
+      createdAt: sondage.createdAt
+        ? format(parseISO(sondage.createdAt), "dd/MM/yyyy HH:mm") // Formatage pour affichage avec l'heure
+        : "N/A",
+    }));
   return (
     <div>
-      <Header text={"Sondage"} />
+      <Header text={"Les Sondages"} />
       <div className="px-8">
         <div className="flex justify-end">
           <button
@@ -21,23 +92,49 @@ const Sondage = () => {
             Créer un sondage
           </button>
         </div>
+
+        <Table
+          rows={rows}
+          columns={() => getColumns(handleViewDetails, isMobile)} // Appel de la fonction pour obtenir les colonnes
+          isMobile={isMobile}
+          sx={{
+            "& .MuiDataGrid-cell": {
+              padding: isMobile ? "2px 4px" : "4px 8px",
+            },
+            "& .MuiDataGrid-columnHeaders": {
+              padding: isMobile ? "4px" : "8px",
+              textAlign: "center",
+            },
+            "& .MuiDataGrid-footer": {
+              padding: isMobile ? "4px" : "8px",
+            },
+          }}
+        />
+        <SondageDetailsModal
+          sondage={selectedSondage}
+          open={detailsOpen}
+          onClose={handleCloseDetails}
+        />
       </div>
 
       <Modal open={open} onClose={handleClose}>
         <Box
           sx={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: 400,
-            bgcolor: 'background.paper',
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: { xs: '90%', sm: 400 }, // Responsiveness
+            maxHeight: '90vh', // Ensure it doesn't exceed viewport height
+            minHeight: '200px', // Ensure the modal has a minimum height
+            bgcolor: "background.paper",
             borderRadius: 2,
             boxShadow: 24,
             p: 4,
+            overflowY: 'auto', // Enable vertical scroll if needed
           }}
         >
-          <SondageForm handleClose={handleClose} />
+          <SondageForm handleClose={handleClose} title="Créer un sondage" />
         </Box>
       </Modal>
     </div>

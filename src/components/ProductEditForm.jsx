@@ -10,6 +10,7 @@ const ProductEditForm = ({ product, category, onClose }) => {
   const defaultCategoryId =
     category?.find((cat) => cat.id === product.categoryId)?.id || "";
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false); // État pour gérer la soumission
   const dispatch = useDispatch();
   const {
     control,
@@ -36,15 +37,14 @@ const ProductEditForm = ({ product, category, onClose }) => {
     }
   }, [product?.urlsPhotos]);
 
-  
   const onSubmit = async (data) => {
+    setIsSubmitting(true); // Activer l'état de soumission
     try {
-      // Fonction pour télécharger une seule image sur Cloudinary
       const uploadToCloudinary = async (file) => {
         const formData = new FormData();
         formData.append("file", file);
-        formData.append("upload_preset", "myImage"); // Assurez-vous que 'myImage' est bien votre preset
-  
+        formData.append("upload_preset", "myImage");
+
         const response = await fetch(
           "https://api.cloudinary.com/v1_1/deuutxkyz/image/upload",
           {
@@ -52,50 +52,44 @@ const ProductEditForm = ({ product, category, onClose }) => {
             body: formData,
           }
         );
-  
+
         if (!response.ok) {
           throw new Error("Échec du téléchargement sur Cloudinary");
         }
-  
+
         const cloudinaryData = await response.json();
         return cloudinaryData.secure_url;
       };
-  
-      // Téléchargez tous les fichiers sélectionnés et récupérez les URLs
+
       const uploadedUrls = await Promise.all(
         selectedFiles.map(async (file) => {
           const fileBlob = await fetch(file).then((res) => res.blob());
           return await uploadToCloudinary(fileBlob);
         })
       );
-  
+
       const parsedQuantity = parseInt(data.quantite_en_stock, 10);
-      const parsedPrice = parseFloat(data.prix_par_unite); // Convertir prix_par_unite en float
-  
-      // Inclure les URLs téléchargées dans urlsPhotos et ajouter l'ID du produit
+      const parsedPrice = parseFloat(data.prix_par_unite);
+
       const formData = {
         ...data,
         quantite_en_stock: isNaN(parsedQuantity) ? 0 : parsedQuantity,
-        prix_par_unite: isNaN(parsedPrice) ? 0 : parsedPrice, // Assigner la valeur convertie
+        prix_par_unite: isNaN(parsedPrice) ? 0 : parsedPrice,
         urlsPhotos: uploadedUrls,
       };
       const productId = product.id;
-  
-      // Envoi des données modifiées
+
       await dispatch(updateProduct({ formData, productId }));
       dispatch(getAllProduits());
-  
-      // Affichage du message de succès et rafraîchissement des données
+
       toast.success("Produit modifié avec succès");
-      dispatch(getAllProduits());
       onClose();
     } catch (error) {
-      // Affichage du message d'erreur en cas d'échec
-      console.error("Erreur lors du traitement des images :", error);
       toast.error("Échec de la modification du produit");
+    } finally {
+      setIsSubmitting(false); // Désactiver l'état de soumission après l'opération
     }
   };
-  
 
   const handleFileChange = (event) => {
     const files = Array.from(event.target.files);
@@ -112,7 +106,6 @@ const ProductEditForm = ({ product, category, onClose }) => {
   };
 
   const handleRemoveExistingImage = (index) => {
-    // Supprimer de la liste des URLs de photos dans le formulaire
     const currentUrls = getValues("urlsPhotos");
     const updatedUrls = currentUrls.filter((_, i) => i !== index);
     setValue("urlsPhotos", updatedUrls);
@@ -220,7 +213,6 @@ const ProductEditForm = ({ product, category, onClose }) => {
         )}
       />
 
-      {/* Affichage des photos sélectionnées */}
       {selectedFiles?.map((file, index) => (
         <Box key={index} sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <img
@@ -254,10 +246,15 @@ const ProductEditForm = ({ product, category, onClose }) => {
         />
       </Button>
 
-      <Button type="submit" variant="contained" color="primary">
-        Enregistrer les modifications
+      <Button
+        type="submit"
+        variant="contained"
+        color="primary"
+        disabled={isSubmitting} // Désactive le bouton si en cours de soumission
+      >
+        {isSubmitting ? "Modification en cours..." : "Enregistrer les modifications"}
       </Button>
-      <Button variant="outlined" onClick={onClose}>
+      <Button variant="outlined" onClick={onClose} disabled={isSubmitting}>
         Annuler
       </Button>
     </Box>

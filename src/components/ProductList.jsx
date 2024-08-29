@@ -20,12 +20,13 @@ import EditIcon from "@mui/icons-material/Edit";
 import ProductForm from "./ProductForm";
 import ProductEditForm from "./ProductEditForm";
 import { useDispatch, useSelector } from "react-redux";
-import {
+import products, {
   activateProduct,
   getAllCategories,
   getAllCommands,
   getAllProduits,
   hideProduct,
+  ProductSale,
 } from "../features/products/products";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -39,63 +40,62 @@ const columns = (
   handleActivateProduct,
   handleEditProduct
 ) => [
-    {
-      field: "category",
-      headerName: "Catégorie",
-      width: isMobile ? 100 : 150,
-    },
-    { field: "name", headerName: "Nom", width: isMobile ? 100 : 150 },
-    { field: "price", headerName: "Prix", width: isMobile ? 100 : 150 },
-    {
-      field: "quantity",
-      headerName: "Stock disponible",
-      width: isMobile ? 100 : 150,
-    },
-    {
-      field: "orderedQuantity",
-      headerName: "Quantité commandée",
-      width: isMobile ? 100 : 150,
-    },
-    {
-      field: "visualisation",
-      headerName: "Visualiser",
-      width: isMobile ? 250 : 150,
-      renderCell: (params) => (
-        <div>
-          <Tooltip title="Détails du produit">
-            <IconButton onClick={() => handleViewDetails(params.row)}>
-              <VisibilityIcon />
+  {
+    field: "category",
+    headerName: "Catégorie",
+    width: isMobile ? 100 : 150,
+  },
+  { field: "name", headerName: "Nom", width: isMobile ? 100 : 150 },
+  { field: "price", headerName: "Prix", width: isMobile ? 100 : 150 },
+  {
+    field: "quantity",
+    headerName: "Stock disponible",
+    width: isMobile ? 100 : 150,
+  },
+  {
+    field: "orderedQuantity",
+    headerName: "Quantité commandée",
+    width: isMobile ? 100 : 150,
+  },
+  {
+    field: "visualisation",
+    headerName: "Visualiser",
+    width: isMobile ? 250 : 150,
+    renderCell: (params) => (
+      <div>
+        <Tooltip title="Détails du produit">
+          <IconButton onClick={() => handleViewDetails(params.row)}>
+            <VisibilityIcon />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Modifier le produit">
+          <IconButton onClick={() => handleEditProduct(params.row)}>
+            <EditIcon style={{ fontSize: 20 }} />
+          </IconButton>
+        </Tooltip>
+        {params.row.statut ? (
+          <Tooltip title="Désactiver le produit" arrow>
+            <IconButton
+              onClick={() => handleDisableProduct(params.row.id)}
+              color="error"
+            >
+              <DisabledByDefaultIcon />
             </IconButton>
           </Tooltip>
-          <Tooltip title="Modifier le produit">
-            <IconButton onClick={() => handleEditProduct(params.row)}>
-              <EditIcon style={{ fontSize: 20 }} />
+        ) : (
+          <Tooltip title="Activer le produit" arrow>
+            <IconButton
+              onClick={() => handleActivateProduct(params.row.id)}
+              color="success"
+            >
+              <CheckCircleOutlineOutlinedIcon />
             </IconButton>
           </Tooltip>
-          {params.row.statut ? (
-            <Tooltip title="Désactiver le produit" arrow>
-              <IconButton
-                onClick={() => handleDisableProduct(params.row.id)}
-                color="error"
-              >
-                <DisabledByDefaultIcon />
-              </IconButton>
-            </Tooltip>
-          ) : (
-            <Tooltip title="Activer le produit" arrow>
-              <IconButton
-                onClick={() => handleActivateProduct(params.row.id)}
-                color="success"
-              >
-                <CheckCircleOutlineOutlinedIcon />
-              </IconButton>
-            </Tooltip>
-          )}
-        </div>
-      ),
-    },
-  ];
-
+        )}
+      </div>
+    ),
+  },
+];
 
 const ProductList = () => {
   const { product, categories, commands } = useSelector(
@@ -112,6 +112,7 @@ const ProductList = () => {
   const [selectedCategory, setSelectedCategory] = useState(""); // État pour la catégorie sélectionnée
   const isMobile = useMediaQuery("(max-width: 640px)");
   const isTablet = useMediaQuery("(max-width: 768px)");
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     dispatch(getAllProduits());
@@ -153,19 +154,24 @@ const ProductList = () => {
       };
     });
 
-
   // Filtrer les produits en fonction du terme de recherche et de la catégorie sélectionnée
   const filteredProducts = sortedProducts.filter((product) => {
-    const matchesCategory = selectedCategory === "" || product?.category === selectedCategory;
-    const matchesSearchTerm = product?.name?.toLowerCase().includes(searchTerm?.toLowerCase());
+    const matchesCategory =
+      selectedCategory === "" || product?.category === selectedCategory;
+    const matchesSearchTerm = product?.name
+      ?.toLowerCase()
+      .includes(searchTerm?.toLowerCase());
 
     return matchesCategory && matchesSearchTerm;
   });
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  const handleViewDetails = (product) => {
-    setSelectedProduct(product);
+  const handleViewDetails = (one_product) => {
+    const detailsProduct = product?.find(
+      (details) => details.id === one_product.id
+    );
+    setSelectedProduct(detailsProduct);
     setActivePhotoIndex(0);
     setViewDetailsOpen(true);
   };
@@ -214,18 +220,35 @@ const ProductList = () => {
     setSelectedCategory(event.target.value);
   };
 
+  const handleFeatureProduct = async () => {
+    setIsLoading(true); // Active le chargement
+    try {
+      await dispatch(ProductSale(selectedProduct.id));
+      toast.success("Produit mis à la une avec succès");
+      dispatch(getAllProduits());
+      setViewDetailsOpen(false); // Ferme le modal si l'opération réussit
+    } catch (error) {
+      toast.error("Échec de modification");
+    } finally {
+      setIsLoading(false); // Désactive le chargement après l'opération
+    }
+  };
+
   return (
     <div className="px-8 mt-28 flex flex-col gap-5 sm:pr-9">
       <ToastContainer />
       <h2 className="font-black text-3xl block md:hidden">Les produits</h2>
       <div className="flex flex-col md:flex-row gap-4 mb-4 items-center justify-between">
         <FormControl sx={{ minWidth: 130, width: 300, maxWidth: "300px" }}>
-          <InputLabel id="category-select-label">Filtrer par catégorie</InputLabel> {/* Ajoutez InputLabel ici */}
+          <InputLabel id="category-select-label">
+            Filtrer par catégorie
+          </InputLabel>{" "}
+          {/* Ajoutez InputLabel ici */}
           <Select
             labelId="category-select-label"
             value={selectedCategory}
             onChange={handleCategoryChange}
-            label="Filtrer par catégorie"  // Le texte est toujours utilisé ici comme attribut label
+            label="Filtrer par catégorie" // Le texte est toujours utilisé ici comme attribut label
           >
             <MenuItem value="">
               <em>Toutes les catégories</em>
@@ -248,8 +271,6 @@ const ProductList = () => {
           }}
         />
       </div>
-
-
 
       <Table
         columns={(isMobile) =>
@@ -296,7 +317,10 @@ const ProductList = () => {
             borderRadius: 1,
             boxShadow: 24,
             p: 2,
-            width: isMobile ? "90%" : "600px",
+            width: isMobile ? "90%" : "500px", // Réduit la largeur pour les écrans plus grands
+            maxWidth: "90vw", // Assure que la largeur ne dépasse pas 90% de la largeur de l'écran
+            maxHeight: "80vh", // Assure que le modal ne dépasse pas 80% de la hauteur de l'écran
+            overflowY: "auto", // Permet le défilement vertical si le contenu dépasse
           }}
         >
           <ProductForm
@@ -306,6 +330,7 @@ const ProductList = () => {
           />
         </Box>
       </Modal>
+
       {/* Modal pour afficher les détails du produit */}
       <Modal open={viewDetailsOpen} onClose={handleViewDetailsClose}>
         <Box
@@ -364,18 +389,29 @@ const ProductList = () => {
 
                 {/* Display additional product details */}
                 <Typography variant="body1" className="mb-2">
-                  <strong>Nom :</strong> {selectedProduct.name}
+                  <strong>Nom :</strong> {selectedProduct.nom_produit}
                 </Typography>
                 <Typography variant="body1" className="mb-2">
-                  <strong>Quantité commandée :</strong> {selectedProduct.orderedQuantity}
+                  <strong>Quantité en stock :</strong>{" "}
+                  {selectedProduct.quantite_en_stock}
                 </Typography>
                 <Typography variant="body1" className="mb-2">
-                  <strong>Prix :</strong> {selectedProduct.price}
-                </Typography>
-                <Typography variant="body1" className="mb-2">
-                  <strong>Quantité en stock :</strong> {selectedProduct.quantity}
+                  <strong>Prix :</strong> {selectedProduct.prix_par_unite}€
                 </Typography>
               </div>
+            </div>
+          )}
+          {/* Add the button at the end of the modal */}
+          {!selectedProduct?.enSolde && (
+            <div className="flex flex-col items-center mt-4">
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleFeatureProduct}
+                disabled={isLoading} // Désactive le bouton pendant le chargement
+              >
+                {isLoading ? "En cours..." : "Marquer comme produit à la une"}
+              </Button>
             </div>
           )}
         </Box>
@@ -392,7 +428,7 @@ const ProductList = () => {
             borderRadius: 1,
             boxShadow: 24,
             p: 2,
-            width: isMobile ? "90%" : "600px",
+            width: isMobile ? "90%" : "400px",
           }}
         >
           <IconButton

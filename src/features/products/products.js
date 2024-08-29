@@ -3,9 +3,13 @@ import {
   API_URL,
   GET_CATEGORIES,
   GET_COMMANDS,
+  GET_SONDAGE,
   HIDE_PRODUCT,
   POST_COMMANDS,
   POST_PRODUCTS,
+  POST_REPONSE,
+  POST_SONDAGE,
+  PRODUCT_SALE,
   PRODUCTS,
   PUT_COMMANDS,
   PUT_PRODUCT,
@@ -58,6 +62,7 @@ export const getAllProduits = createAsyncThunk(
 export const postProduit = createAsyncThunk(
   "post/postProduit",
   async (data, thunkApi) => {
+   
     try {
       const response = await api.post(POST_PRODUCTS, data);
 
@@ -158,10 +163,58 @@ export const updateCommand = createAsyncThunk(
     }
   }
 );
+export const postReponse = createAsyncThunk(
+  "post/postReponse",
+  async (data, thunkApi) => {
+    try {
+      const response = await api.post(POST_REPONSE, data);
+    return response.data.reponseSondage;
+    } catch (error) {
+      console.log(error)
+      return thunkApi.rejectWithValue(error);
+    }
+  }
+); 
+export const postSondage = createAsyncThunk(
+  "post/postSondage",
+  async (data, thunkApi) => {
+   
+    try {
+      const response = await api.post(POST_SONDAGE, data);
+      return response.data.sondage;
+    } catch (error) {
+      return thunkApi.rejectWithValue(error);
+    }
+  }
+); 
+export const getAllSondages = createAsyncThunk(
+  "get/getAllSondages",
+  async ( thunkApi) => {
+    try {
+     
+      const response = await api.get(GET_SONDAGE);
+     return response.data;
+    } catch (error) {
+      return thunkApi.rejectWithValue(error);
+    }
+  }
+);
+export const ProductSale = createAsyncThunk(
+  "put/ProductSale",
+  async (idProduit, thunkApi) => {
+    try {
+      const response = await api.put(PRODUCT_SALE + idProduit);
+      return response.data.produit;
+    } catch (error) {
+      return thunkApi.rejectWithValue(error);
+    }
+  }
+);
 const initialState = {
   product: [],
   categories: [],
   commands: [],
+  sondages : [],
   error: null,
 };
 
@@ -177,6 +230,10 @@ const products = createSlice({
       .addCase(getAllProduits.fulfilled, (state, action) => {
         state.product = action.payload;
         state.status = "succeeded";
+      })
+      .addCase(getAllProduits.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
       })
       .addCase(postProduit.pending, (state) => {
         state.status = "loading";
@@ -289,6 +346,54 @@ const products = createSlice({
         state.status = "success";
       })
       .addCase(updateCommand.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      })
+      .addCase(postSondage.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(postSondage.fulfilled, (state, action) => {
+        state.sondages.push(action.payload);
+        state.error = null;
+      })
+      .addCase(postSondage.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      })
+      .addCase(getAllSondages.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(getAllSondages.fulfilled, (state, action) => {
+        state.sondages = action.payload;
+        state.status = "succeeded";
+      })
+      .addCase(getAllSondages.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      })
+      .addCase(postReponse.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(postReponse.fulfilled, (state, action) => {
+        
+        state.error = null;
+      })
+      .addCase(postReponse.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      })
+      .addCase(ProductSale.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(ProductSale.fulfilled, (state, action) => {
+        const index = state.product.findIndex(
+          (order) => order.id === action.payload.id
+        );
+        if (index !== -1) {
+          state.product[index].enSolde = action.payload.enSolde;
+        }
+      })
+      .addCase(ProductSale.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.error.message;
       })
