@@ -36,6 +36,7 @@ const columns = (isMobile, handleViewDetails) => [
     width: isMobile ? 100 : 260,
   },
   { field: "prixTotal", headerName: "Prix total", width: isMobile ? 100 : 150 },
+  { field: "numero_commande", headerName: "Numéro de la commande", width: isMobile ? 100 : 150 },
   {
     field: "statut",
     headerName: "Statut",
@@ -94,6 +95,7 @@ const Commands = () => {
       ? format(new Date(command.createdAt), "dd/MM/yyyy")
       : "N/A",
     nombreProduits: (command.reservations && command.reservations.length) || 0,
+    numero_commande: command.numero_commande || "Non spécifié",
     prixTotal: command.total_commande + " €",
     statut: command.status || "N/A",
   }));
@@ -178,7 +180,7 @@ const Commands = () => {
               </Typography>
 
               <div className="mt-6">
-                <Typography variant="h6" className="text-2xl font-semibold">
+                <Typography variant="h6" className="text-2xl font-semibold" >
                   Informations du client
                 </Typography>
                 <Typography variant="subtitle1" className="text-lg font-medium">

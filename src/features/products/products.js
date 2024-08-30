@@ -118,6 +118,7 @@ export const putCommand = createAsyncThunk(
       const response = await api.put(PUT_COMMANDS + id, { status });
       return response.data.commande;
     } catch (error) {
+      console.log(error)
       return thunkApi.rejectWithValue(error);
     }
   }
@@ -157,7 +158,7 @@ export const activateProduct = createAsyncThunk(
 );
 export const updateCommand = createAsyncThunk(
   "put/updateCommand",
-  async(updatedData,thunkApi) => {
+  async (updatedData, thunkApi) => {
     try {
       const response = await api.put(UPDATE_COMMAND + updatedData.id, updatedData);
       return response.data.commande;

@@ -18,13 +18,6 @@ const Home = () => {
     const foundSaleProduct = product.find((item) => item.enSolde);
     if (foundSaleProduct) {
       setSaleProduct(foundSaleProduct);
-
-      // Masquer le pop-up après 3 secondes
-      const timer = setTimeout(() => {
-        setSaleProduct(null);
-      }, 3000);
-
-      return () => clearTimeout(timer);
     }
   }, [product]);
 
@@ -61,12 +54,14 @@ const Home = () => {
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: 300,
+            width: { xs: '90%', sm: 400 }, // Responsive width
+            maxHeight: '80vh', // Height limit for scroll
             bgcolor: "background.paper",
             boxShadow: 24,
             p: 4,
             borderRadius: 2,
             textAlign: "center",
+            overflowY: 'auto', // Enable vertical scroll if needed
           }}
         >
           {saleProduct && (
@@ -99,6 +94,7 @@ const Home = () => {
           )}
         </Box>
       </Modal>
+
     </div>
   );
 };
