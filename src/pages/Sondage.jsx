@@ -8,6 +8,7 @@ import Table from "../components/Table";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { format, parseISO } from "date-fns";
 import SondageDetailsModal from "../components/SondageDetailsModal";
+import { getAllUsers } from "../features/users/userSlice";
 
 // Définir les colonnes de la table comme une fonction
 const getColumns = (handleViewDetails, isMobile) => [
@@ -46,6 +47,7 @@ const Sondage = () => {
 
   const [selectedSondage, setSelectedSondage] = useState(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const { user } = useSelector((state) => state.users);
 
   const handleOpenDetails = (sondage) => {
     setSelectedSondage(sondage);
@@ -63,6 +65,7 @@ const Sondage = () => {
 
   useEffect(() => {
     dispatch(getAllSondages());
+    dispatch(getAllUsers())
   }, [dispatch]);
 
   // Préparer les données pour la table
@@ -118,6 +121,7 @@ const Sondage = () => {
           sondage={selectedSondage}
           open={detailsOpen}
           onClose={handleCloseDetails}
+          users = {user}
         />
       </div>
 
