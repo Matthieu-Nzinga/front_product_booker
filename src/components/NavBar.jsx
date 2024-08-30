@@ -119,10 +119,25 @@ const NavBar = () => {
         aria-labelledby="modal-title"
         aria-describedby="modal-description"
       >
-        <Box sx={{ width: '90%', maxWidth: 400, margin: 'auto', marginTop: '5%', padding: 2, backgroundColor: 'white', borderRadius: 2 }}>
-          <SondageForm handleClose={() => setIsModalOpen(false)}  title="Votre suggestion"/>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: { xs: '90%', sm: 400 },
+            maxHeight: "80vh", // Limite la hauteur maximale du modal à 80% de la hauteur de la vue
+            bgcolor: "background.paper",
+            borderRadius: 2,
+            boxShadow: 24,
+            p: 4,
+            overflowY: 'auto', // Active le scroll vertical si le contenu dépasse la hauteur maximale
+          }}
+        >
+          <SondageForm handleClose={() => setIsModalOpen(false)} title="Votre suggestion" />
         </Box>
       </Modal>
+
     </div>
   );
 };

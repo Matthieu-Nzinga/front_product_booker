@@ -109,18 +109,6 @@ const UserForm = ({ onClose }) => {
       />
       <TextField
         select
-        label="Sexe"
-        defaultValue=""
-        {...register("sexe", { required: "Sexe est requis" })}
-        error={!!errors.sexe}
-        helperText={errors.sexe?.message}
-        fullWidth
-      >
-        <MenuItem value="Femme">Femme</MenuItem>
-        <MenuItem value="Homme">Homme</MenuItem>
-      </TextField>
-      <TextField
-        select
         label="Rôle"
         defaultValue=""
         {...register("role", { required: "Rôle est requis" })}

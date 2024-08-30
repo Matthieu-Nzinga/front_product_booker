@@ -89,6 +89,7 @@ const CommandEdit = ({ command, onClose }) => {
                         <div className="flex flex-col flex-grow sm:mx-4 mt-4 sm:mt-0">
                             <h2 className="text-xl font-bold">{reservation.produit?.nom_produit}</h2>
                             <p className="text-sm text-gray-600">Prix unitaire: {reservation.produit?.prix_par_unite}€</p>
+                            <p className='mt-2'>Quantité</p>
                             <div className="flex items-center gap-2 mt-2">
                                 <input
                                     type="number"

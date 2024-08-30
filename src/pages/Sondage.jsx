@@ -11,13 +11,14 @@ import SondageDetailsModal from "../components/SondageDetailsModal";
 
 // Définir les colonnes de la table comme une fonction
 const getColumns = (handleViewDetails, isMobile) => [
-  { field: "nom_produit", headerName: "Nom du produit", width: 200 },
-  { field: "description", headerName: "Description", width: 200 },
-  { field: "question", headerName: "Question", width: 250 },
+  { field: "nom_produit", headerName: "Nom du produit", width: 150 },
+  { field: "description", headerName: "Description", width: 150 },
+  { field: "message", headerName: "Message", width: 150 },
+  { field: "prix", headerName: "Prix", width: 150 },
   {
     field: "createdAt",
     headerName: "Date",
-    width: 200,
+    width: 150,
   },
   {
     field: "visualisation",
@@ -70,7 +71,10 @@ const Sondage = () => {
       id: sondage.id,
       nom_produit: sondage.nom_produit,
       description: sondage.description,
-      question: sondage.question,
+      message: sondage.question,
+      prix: sondage?.prix
+        ? `${parseFloat(sondage.prix).toFixed(2)} €`
+        : "Non spécifié",
       createdAt: sondage.createdAt, // Garder la date au format ISO pour le tri
     }))
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // Trier les sondages du plus récent au plus ancien en tenant compte de l'heure
@@ -125,8 +129,6 @@ const Sondage = () => {
             left: "50%",
             transform: "translate(-50%, -50%)",
             width: { xs: '90%', sm: 400 }, // Responsiveness
-            maxHeight: '90vh', // Ensure it doesn't exceed viewport height
-            minHeight: '200px', // Ensure the modal has a minimum height
             bgcolor: "background.paper",
             borderRadius: 2,
             boxShadow: 24,
