@@ -10,6 +10,7 @@ import {
   POST_REPONSE,
   POST_SONDAGE,
   PRODUCT_SALE,
+  PRODUCT_UNSALE,
   PRODUCTS,
   PUT_COMMANDS,
   PUT_PRODUCT,
@@ -209,6 +210,17 @@ export const ProductSale = createAsyncThunk(
     }
   }
 );
+export const ProductUnsale = createAsyncThunk(
+  "put/ProductUnsale",
+  async (idProduit, thunkApi) => {
+    try {
+      const response = await api.put(PRODUCT_UNSALE + idProduit);
+      return response.data.produit;
+    } catch (error) {
+      return thunkApi.rejectWithValue(error);
+    }
+  }
+);
 const initialState = {
   product: [],
   categories: [],
@@ -393,6 +405,21 @@ const products = createSlice({
         }
       })
       .addCase(ProductSale.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      })
+      .addCase(ProductUnsale.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(ProductUnsale.fulfilled, (state, action) => {
+        const index = state.product.findIndex(
+          (order) => order.id === action.payload.id
+        );
+        if (index !== -1) {
+          state.product[index].enSolde = action.payload.enSolde;
+        }
+      })
+      .addCase(ProductUnsale.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.error.message;
       })
