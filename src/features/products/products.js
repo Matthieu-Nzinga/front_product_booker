@@ -178,7 +178,6 @@ export const postReponse = createAsyncThunk(
 export const postSondage = createAsyncThunk(
   "post/postSondage",
   async (data, thunkApi) => {
-   
     try {
       const response = await api.post(POST_SONDAGE, data);
       return response.data.sondage;
