@@ -133,16 +133,18 @@ const Sondage = () => {
             left: "50%",
             transform: "translate(-50%, -50%)",
             width: { xs: '90%', sm: 400 }, // Responsiveness
+            maxHeight: '80vh', // Hauteur maximale pour le défilement
             bgcolor: "background.paper",
             borderRadius: 2,
             boxShadow: 24,
             p: 4,
-            overflowY: 'auto', // Enable vertical scroll if needed
+            overflowY: 'auto', // Activer le défilement vertical si le contenu dépasse
           }}
         >
           <SondageForm handleClose={handleClose} title="Créer un sondage" />
         </Box>
       </Modal>
+
     </div>
   );
 };

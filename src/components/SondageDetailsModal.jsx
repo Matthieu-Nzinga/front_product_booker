@@ -11,7 +11,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import React, { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import { useDispatch } from "react-redux";
-import { getAllSondages, postReponse } from "../features/products/products";
+import { getAllSondages, hidePopuSondage, postReponse, showPopuSondage } from "../features/products/products";
 import { toast } from "react-toastify";
 
 const SondageDetailsModal = ({ sondage, open, onClose, users }) => {
@@ -50,7 +50,6 @@ const SondageDetailsModal = ({ sondage, open, onClose, users }) => {
   const handleResponseChange = (event) => {
     setResponseState(event.target.value);
   };
-
   const handleSave = async () => {
     if (response) {
       setLoading(true); // Activer l'état de chargement
@@ -80,6 +79,30 @@ const SondageDetailsModal = ({ sondage, open, onClose, users }) => {
   const countFor = userResponses.for.length;
   const countAgainst = userResponses.against.length;
 
+  const handleShowPopup = async () => {
+    setLoading(true); // Active le chargement
+    try {
+      await dispatch(showPopuSondage(sondage.id));
+      toast.success("Activation réussie");
+      dispatch(getAllSondages());
+    } catch (error) {
+      toast.error("Échec d'activation");
+    } finally {
+      setLoading(false); // Désactive le chargement après l'opération
+    }
+  };
+  const handleHidePopup = async () => {
+    setLoading(true); // Active le chargement
+    try {
+      await dispatch(hidePopuSondage(sondage.id));
+      toast.success(" Désactvation  réussie");
+      dispatch(getAllSondages());
+    } catch (error) {
+      toast.error("Échec de modification");
+    } finally {
+      setLoading(false); // Désactive le chargement après l'opération
+    }
+  };
   return (
     <Modal open={open} onClose={onClose}>
       <Box
@@ -200,6 +223,28 @@ const SondageDetailsModal = ({ sondage, open, onClose, users }) => {
             </div>
           ) : (
             <p>Aucune photo disponible</p>
+          )}
+          {sondage.user.role === "Admin" && (
+            sondage.pop_up ? (
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleHidePopup}
+                disabled={loading}
+                sx={{ marginTop: 2 }}
+              >
+                {loading ? "En cours..." : "Désactiver la pop up côté client"}
+              </Button>
+            ) : 
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleShowPopup}
+                disabled={loading}
+                sx={{ marginTop: 2 }}
+              >
+                {loading ? "En cours..." : "Activer la pop up côté client"}
+              </Button>
           )}
         </div>
       </Box>

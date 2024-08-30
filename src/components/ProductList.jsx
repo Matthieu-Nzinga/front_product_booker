@@ -244,7 +244,7 @@ const ProductList = () => {
     setIsLoading(true); // Active le chargement
     try {
       await dispatch(ProductUnsale(selectedProduct.id));
-      toast.success("Produit désactvier comme à la une avec succès");
+      toast.success("Produit désactver comme à la une avec succès");
       dispatch(getAllProduits());
       setViewDetailsOpen(false); // Ferme le modal si l'opération réussit
     } catch (error) {
@@ -253,7 +253,6 @@ const ProductList = () => {
       setIsLoading(false); // Désactive le chargement après l'opération
     }
   };
-   console.log(product)
   return (
     <div className="px-8 mt-28 flex flex-col gap-5 sm:pr-9">
       <ToastContainer />
