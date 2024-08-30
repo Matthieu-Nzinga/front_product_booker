@@ -22,6 +22,7 @@ const columns = (isMobile, handleEditCommand, handleViewDetails) => [
   { field: "date", headerName: "Date", width: isMobile ? 100 : 150 },
   { field: "nombreProduits", headerName: "Nombre de produits", width: isMobile ? 100 : 150 },
   { field: "prixTotal", headerName: "Prix total", width: isMobile ? 100 : 150 },
+  { field: "numero_commande", headerName: "Numéro de la commande", width: isMobile ? 100 : 150 },
   {
     field: "statut",
     headerName: "Statut",
@@ -35,7 +36,7 @@ const columns = (isMobile, handleEditCommand, handleViewDetails) => [
   {
     field: "action",
     headerName: "Action",
-    width: isMobile ? 150 : 200, // Augmentez la largeur pour ajouter l'icône d'annulation
+    width: isMobile ? 150 : 150, // Augmentez la largeur pour ajouter l'icône d'annulation
     renderCell: (params) => (
       <>
         {
@@ -104,6 +105,7 @@ const MyReservations = () => {
     date: command.createdAt ? format(new Date(command.createdAt), 'dd/MM/yyyy') : 'N/A',
     nombreProduits: (command.reservations && command.reservations.length) || 0,
     prixTotal: command.total_commande + " €",
+    numero_commande: command.numero_commande,
     statut: command.status || 'N/A',
   }));
 

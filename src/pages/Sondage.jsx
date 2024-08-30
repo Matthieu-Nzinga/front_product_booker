@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Header from "../components/Header";
-import { Modal, Box, useMediaQuery, Tooltip, IconButton } from "@mui/material";
-import SondageForm from "../components/SondageForm"; // Assurez-vous que le chemin est correct
+import { Modal, Box, useMediaQuery, Tooltip, IconButton, Select, MenuItem } from "@mui/material";
+import SondageForm from "../components/SondageForm";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllSondages } from "../features/products/products";
 import Table from "../components/Table";
@@ -9,8 +9,8 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import { format, parseISO } from "date-fns";
 import SondageDetailsModal from "../components/SondageDetailsModal";
 import { getAllUsers } from "../features/users/userSlice";
+import { ToastContainer } from "react-toastify";
 
-// Définir les colonnes de la table comme une fonction
 const getColumns = (handleViewDetails, isMobile) => [
   { field: "nom_produit", headerName: "Nom du produit", width: 150 },
   { field: "description", headerName: "Description", width: 150 },
@@ -48,6 +48,7 @@ const Sondage = () => {
   const [selectedSondage, setSelectedSondage] = useState(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const { user } = useSelector((state) => state.users);
+  const [filterRole, setFilterRole] = useState("all"); // Valeur par défaut
 
   const handleOpenDetails = (sondage) => {
     setSelectedSondage(sondage);
@@ -63,13 +64,25 @@ const Sondage = () => {
     handleOpenDetails(detailsSondage);
   };
 
+  const handleFilterChange = (event) => {
+    setFilterRole(event.target.value);
+  };
+
   useEffect(() => {
     dispatch(getAllSondages());
     dispatch(getAllUsers())
   }, [dispatch]);
 
-  // Préparer les données pour la table
-  const rows = sondages
+  const filteredSondages = sondages.filter((sondage) => {
+    if (filterRole === "Client") {
+      return sondage.user?.role === "Client";
+    } else if (filterRole === "Admin") {
+      return sondage.user?.role === "Admin";
+    }
+    return true; // Si aucun filtre n'est appliqué, afficher tous les sondages
+  });
+
+  const rows = filteredSondages
     .map((sondage) => ({
       id: sondage.id,
       nom_produit: sondage.nom_produit,
@@ -78,31 +91,50 @@ const Sondage = () => {
       prix: sondage?.prix
         ? `${parseFloat(sondage.prix).toFixed(2)} €`
         : "Non spécifié",
-      createdAt: sondage.createdAt, // Garder la date au format ISO pour le tri
+      createdAt: sondage.createdAt,
     }))
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // Trier les sondages du plus récent au plus ancien en tenant compte de l'heure
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .map((sondage) => ({
       ...sondage,
       createdAt: sondage.createdAt
-        ? format(parseISO(sondage.createdAt), "dd/MM/yyyy HH:mm") // Formatage pour affichage avec l'heure
+        ? format(parseISO(sondage.createdAt), "dd/MM/yyyy HH:mm")
         : "N/A",
     }));
+
   return (
     <div>
       <Header text={"Les Sondages"} />
+      <ToastContainer />
       <div className="px-8">
-        <div className="flex justify-end">
-          <button
-            className="text-center mb-4 font-semibold text-base bg-customBlue px-[93px] text-white py-3 hover:bg-blue-600 mt-28 rounded-xl"
-            onClick={handleOpen}
-          >
-            Créer un sondage
-          </button>
+        <div className="flex justify-between items-center mt-28">
+          <div>
+            <Select
+              value={filterRole}
+              onChange={handleFilterChange}
+              variant="outlined"
+              sx={{
+                marginRight: 2,
+                width: 400,
+              }}
+            >
+              <MenuItem value="all">Tous les sondages</MenuItem>
+              <MenuItem value="Client">Suggestion des clients</MenuItem>
+              <MenuItem value="Admin">Vos sondages</MenuItem>
+            </Select>
+           </div>
+          <div>
+            <button
+              className="text-center mb-4 font-semibold text-base bg-customBlue px-[93px] text-white py-3 hover:bg-blue-600 rounded-xl"
+              onClick={handleOpen}
+            >
+              Créer un sondage
+            </button>
+        </div>
         </div>
 
         <Table
           rows={rows}
-          columns={() => getColumns(handleViewDetails, isMobile)} // Appel de la fonction pour obtenir les colonnes
+          columns={() => getColumns(handleViewDetails, isMobile)}
           isMobile={isMobile}
           sx={{
             "& .MuiDataGrid-cell": {
@@ -121,7 +153,7 @@ const Sondage = () => {
           sondage={selectedSondage}
           open={detailsOpen}
           onClose={handleCloseDetails}
-          users = {user}
+          users={user}
         />
       </div>
 
@@ -132,19 +164,18 @@ const Sondage = () => {
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: { xs: '90%', sm: 400 }, // Responsiveness
-            maxHeight: '80vh', // Hauteur maximale pour le défilement
+            width: { xs: '90%', sm: 400 },
+            maxHeight: '80vh',
             bgcolor: "background.paper",
             borderRadius: 2,
             boxShadow: 24,
             p: 4,
-            overflowY: 'auto', // Activer le défilement vertical si le contenu dépasse
+            overflowY: 'auto',
           }}
         >
           <SondageForm handleClose={handleClose} title="Créer un sondage" />
         </Box>
       </Modal>
-
     </div>
   );
 };
