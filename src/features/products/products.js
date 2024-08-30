@@ -4,6 +4,7 @@ import {
   GET_CATEGORIES,
   GET_COMMANDS,
   GET_SONDAGE,
+  HIDE_POPUP_SONDAGE,
   HIDE_PRODUCT,
   POST_COMMANDS,
   POST_PRODUCTS,
@@ -14,6 +15,7 @@ import {
   PRODUCTS,
   PUT_COMMANDS,
   PUT_PRODUCT,
+  SHOW_POPUP_SONDAGE,
   SHOW_PRODUCT,
   UPDATE_COMMAND,
 } from "../../config";
@@ -205,6 +207,28 @@ export const ProductSale = createAsyncThunk(
     try {
       const response = await api.put(PRODUCT_SALE + idProduit);
       return response.data.produit;
+    } catch (error) {
+      return thunkApi.rejectWithValue(error);
+    }
+  }
+);
+export const showPopuSondage = createAsyncThunk(
+  "put/showPopuSondage",
+  async (idSondage, thunkApi) => {
+    try {
+      const response = await api.put(SHOW_POPUP_SONDAGE + idSondage);
+      return response.data.sondage;
+    } catch (error) {
+      return thunkApi.rejectWithValue(error);
+    }
+  }
+);
+export const hidePopuSondage = createAsyncThunk(
+  "put/hidePopuSondage",
+  async (idSondage, thunkApi) => {
+    try {
+      const response = await api.put(HIDE_POPUP_SONDAGE + idSondage);
+      return response.data.sondage;
     } catch (error) {
       return thunkApi.rejectWithValue(error);
     }
@@ -420,6 +444,36 @@ const products = createSlice({
         }
       })
       .addCase(ProductUnsale.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      })
+      .addCase(showPopuSondage.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(showPopuSondage.fulfilled, (state, action) => {
+        const index = state.sondages.findIndex(
+          (sondage) => sondage.id === action.payload.id
+        );
+        if (index !== -1) {
+          state.sondages[index].pop_up = action.payload.pop_up;
+        }
+      })
+      .addCase(showPopuSondage.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      })
+      .addCase(hidePopuSondage.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(hidePopuSondage.fulfilled, (state, action) => {
+        const index = state.sondages.findIndex(
+          (sondage) => sondage.id === action.payload.id
+        );
+        if (index !== -1) {
+          state.sondages[index].pop_up = action.payload.pop_up;
+        }
+      })
+      .addCase(hidePopuSondage.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.error.message;
       })
