@@ -106,7 +106,6 @@ const Commands = () => {
       setOpen(true);
     }
   };
-
   const handleCloseModal = () => {
     setOpen(false);
     setSelectedCommand(null);
@@ -192,9 +191,24 @@ const Commands = () => {
                 <Typography variant="subtitle1" className="text-lg font-medium">
                   Email: {selectedCommand.user.email}
                 </Typography>
-                <Typography variant="subtitle1" className="text-lg font-medium">
-                  Sexe: {selectedCommand.user.sexe}
+              </div>
+              {/* Afficher les détails des produits */}
+              <div className="mt-6">
+                <Typography variant="h6" className="text-2xl font-semibold">
+                  Les Produits de la commande
                 </Typography>
+                {selectedCommand.reservations.map((reservation) => (
+                  <div key={reservation.id} className="mt-2">
+                    <Typography
+                      variant="subtitle1"
+                      className="text-lg font-medium"
+                    >
+                     <strong> {reservation.produit.nom_produit}</strong>:{" "} <br />
+                     - Prix : {reservation.produit.prix_par_unite} € <br />
+                     - Quanité commandée : {reservation.quantite_commande}
+                    </Typography>
+                  </div>
+                ))}
               </div>
 
               <div className="mt-6">
@@ -213,6 +227,7 @@ const Commands = () => {
                       value={status}
                       onChange={handleStatusChange}
                     >
+                      <MenuItem value="En attente">En attente</MenuItem>
                       <MenuItem value="En cours">En cours</MenuItem>
                       <MenuItem value="Livré">Livré</MenuItem>
                     </Select>

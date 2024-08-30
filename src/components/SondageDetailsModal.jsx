@@ -113,7 +113,10 @@ const SondageDetailsModal = ({ sondage, open, onClose }) => {
           <strong>Description:</strong> {sondage.description}
         </p>
         <p>
-          <strong>Question:</strong> {sondage.question}
+          <strong>Message:</strong> {sondage.question}
+        </p>
+        <p>
+          <strong>Prix:</strong> {sondage.prix}€
         </p>
         {/* Radio buttons for roles other than Admin */}
         {userRole !== "Admin" && (

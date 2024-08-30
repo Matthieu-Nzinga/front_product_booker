@@ -92,18 +92,6 @@ const UserEditForm = ({ userData, onClose }) => {
             />
             <TextField
                 select
-                label="Sexe"
-                defaultValue={currentUser?.sexe || userData.sexe || ""}
-                {...register("sexe", { required: "Sexe est requis" })}
-                error={!!errors.sexe}
-                helperText={errors.sexe?.message}
-                fullWidth
-            >
-                <MenuItem value="Femme">Femme</MenuItem>
-                <MenuItem value="Homme">Homme</MenuItem>
-            </TextField>
-            <TextField
-                select
                 label="Rôle"
                 defaultValue={currentUser?.role || userData.role || ""}
                 {...register("role", { required: "Rôle est requis" })}
