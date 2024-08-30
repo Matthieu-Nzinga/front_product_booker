@@ -110,12 +110,33 @@ const SondageForm = ({ handleClose, title }) => {
       />
       <TextField
         fullWidth
-        label="Question"
+        label="Message"
         variant="outlined"
         margin="normal"
         {...register("question", { required: "La Question est requise" })}
         error={!!errors.question}
         helperText={errors.question ? errors.question.message : ""}
+      />
+      <TextField
+        fullWidth
+        variant="outlined"
+        margin="normal"
+        label="A quel prix aimeriez-vous acheter ce produit?"
+        type="number"
+        {...register("prix", {
+          required: "Prix est requis",
+          valueAsNumber: true,
+          validate: (value) => {
+            const parsedValue = parseFloat(value);
+            return (
+              !isNaN(parsedValue) ||
+              "Le prix doit être un nombre décimal valide"
+            );
+          },
+          setValueAs: (value) => parseFloat(value),
+        })}
+        error={!!errors.prix_par_unite}
+        helperText={errors.prix_par_unite ? errors.prix_par_unite.message : ""}
       />
       <Box
         sx={{
