@@ -126,7 +126,7 @@ const SondageForm = ({ handleClose, title }) => {
         variant="outlined"
         margin="normal"
         label="A quel prix aimeriez-vous acheter ce produit?"
-        type="number"
+        type="text"
         {...register("prix", {
           required: "Prix est requis",
           valueAsNumber: true,
@@ -139,8 +139,8 @@ const SondageForm = ({ handleClose, title }) => {
           },
           setValueAs: (value) => parseFloat(value),
         })}
-        error={!!errors.prix_par_unite}
-        helperText={errors.prix_par_unite ? errors.prix_par_unite.message : ""}
+        error={!!errors.prix}
+        helperText={errors.prix ? errors.prix.message : ""}
       />
       <Box
         sx={{
