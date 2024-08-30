@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllSondages } from "../features/products/products";
+import {  getAllSondages } from "../features/products/products";
 import Table from "./Table";
 import { format } from "date-fns";
 import { IconButton, Tooltip, useMediaQuery, Typography } from "@mui/material";
@@ -10,13 +10,13 @@ import { ToastContainer } from "react-toastify";
 import { jwtDecode } from "jwt-decode";
 
 const getColumns = (handleViewDetails, isMobile) => [
-  { field: "nom_produit", headerName: "Nom du produit", width: 200 },
-  { field: "description", headerName: "Description", width: 200 },
-  { field: "question", headerName: "Question", width: 250 },
+  { field: "nom_produit", headerName: "Nom du produit", width: 150 },
+  { field: "description", headerName: "Description", width: 150 },
+  { field: "question", headerName: "Message", width: 150 },
   {
     field: "createdAt",
     headerName: "Date",
-    width: 200,
+    width: 150,
   },
   {
     field: "visualisation",
