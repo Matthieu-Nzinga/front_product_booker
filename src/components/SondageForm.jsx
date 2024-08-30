@@ -70,7 +70,11 @@ const SondageForm = ({ handleClose, title }) => {
 
     try {
       await dispatch(postSondage(formDataWithImages)).unwrap();
-      toast.success("Sondage créé avec succès");
+       if (decodedToken.role === "Client") {
+         toast.success("Merci de nous avoir suggéré ce produit. Nous reviendrons vers vous rapidement.");
+       } else {
+         toast.success("Sondage créé avec succès");
+       }
       dispatch(getAllSondages())
       handleClose(); // Ferme le modal après soumission
     } catch (error) {

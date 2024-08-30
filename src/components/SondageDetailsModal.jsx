@@ -224,7 +224,7 @@ const SondageDetailsModal = ({ sondage, open, onClose, users }) => {
           ) : (
             <p>Aucune photo disponible</p>
           )}
-          {sondage.user.role === "Admin" && (
+          {decodedToken.role === "Admin" && sondage.user.role === "Admin" && (
             sondage.pop_up ? (
               <Button
                 variant="contained"
