@@ -49,6 +49,7 @@ const Sondage = () => {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const { user } = useSelector((state) => state.users);
   const [filterRole, setFilterRole] = useState("all"); // Valeur par défaut
+  const filteredRole = useSelector((state) => state.products.filteredRole);
 
   const handleOpenDetails = (sondage) => {
     setSelectedSondage(sondage);
@@ -74,9 +75,9 @@ const Sondage = () => {
   }, [dispatch]);
 
   const filteredSondages = sondages.filter((sondage) => {
-    if (filterRole === "Client") {
-      return sondage.user?.role === "Client";
-    } else if (filterRole === "Admin") {
+    if (filteredRole === "Client") {
+      return sondage.user?.role === "Client"; 
+    } else if (filteredRole === "Admin") {
       return sondage.user?.role === "Admin";
     }
     return true; // Si aucun filtre n'est appliqué, afficher tous les sondages
@@ -106,22 +107,7 @@ const Sondage = () => {
       <Header text={"Les Sondages"} />
       <ToastContainer />
       <div className="px-8">
-        <div className="flex justify-between items-center mt-28">
-          <div>
-            <Select
-              value={filterRole}
-              onChange={handleFilterChange}
-              variant="outlined"
-              sx={{
-                marginRight: 2,
-                width: 400,
-              }}
-            >
-              <MenuItem value="all">Tous les sondages</MenuItem>
-              <MenuItem value="Client">Suggestion des clients</MenuItem>
-              <MenuItem value="Admin">Vos sondages</MenuItem>
-            </Select>
-           </div>
+        <div className="flex justify-end items-center mt-28">
           <div>
             <button
               className="text-center mb-4 font-semibold text-base bg-customBlue px-[93px] text-white py-3 hover:bg-blue-600 rounded-xl"

@@ -126,14 +126,14 @@ const CommandEdit = ({ command, onClose }) => {
                     <span className="text-black text-2xl ml-2">{formattedTotal}€</span>
                 </div>
                 <button
-                    className={`mt-6 w-full md:w-[50%] text-white rounded-md mb-5 py-3 px-6 ${isUpdateDisabled
+                    className={`mt-6 w-full md:w-[60%] text-white rounded-md mb-5 py-3 px-6 ${isUpdateDisabled
                         ? 'bg-gray-400 cursor-not-allowed'
                         : 'bg-customBlue'
                         }`}
                     onClick={handleUpdate}
                     disabled={isUpdateDisabled}
                 >
-                    {isUpdating ? 'Modification en cours...' : 'Modifier la commande'}
+                    {isUpdating ? 'Modification en cours...' : 'VALIDER LA COMMANDE'}
                 </button>
                 <button
                     className={`mt-6 w-full md:w-[50%] text-white rounded-md mb-5 py-3 px-6 ${isCancelDisabled

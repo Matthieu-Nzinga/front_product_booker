@@ -44,12 +44,10 @@ export const getAllUsers = createAsyncThunk(
 export const postUser = createAsyncThunk(
   "post/postUser",
   async (data, thunkApi) => {
-    console.log(data)
     try {
       const response = await api.post(POST_USERS, data);
       return response.data;
     } catch (error) {
-    
       return thunkApi.rejectWithValue(error);
     }
   }
