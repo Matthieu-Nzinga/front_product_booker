@@ -70,10 +70,11 @@ const SondageClient = () => {
     return (
       sondage?.reponses?.every(response => response.userId !== userId) &&
       sondage.user.userId !== userId &&
-      sondage.user.role === "Admin"
+      sondage.user.role === "Admin" &&
+      sondage.statut === true
     );
   });
-
+  
   // Préparer les données pour la table
   const rows = filteredSondages.map((sondage) => ({
     id: sondage.id,

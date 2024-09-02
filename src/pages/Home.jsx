@@ -27,18 +27,30 @@ const Home = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    // Rechercher un sondage avec pop_up == true
-    const sondageWithPopup = filteredSondages.find(sondage => sondage.pop_up === true);
-    if (sondageWithPopup) {
-      setSelectedSondage(sondageWithPopup);
+    // Vérifier si le pop-up a déjà été affiché pour le sondage
+    const sondagePopupShown = localStorage.getItem("sondagePopupShown");
+
+    // Rechercher un sondage avec pop_up == true s'il n'a pas encore été affiché
+    if (!sondagePopupShown) {
+      const sondageWithPopup = filteredSondages.find(sondage => sondage.pop_up === true);
+      if (sondageWithPopup) {
+        setSelectedSondage(sondageWithPopup);
+        localStorage.setItem("sondagePopupShown", "true"); // Enregistrer l'état
+      }
     }
   }, [sondages]);
 
   useEffect(() => {
-    // Rechercher un produit en solde
-    const foundSaleProduct = filteredProducts.find((item) => item.enSolde);
-    if (foundSaleProduct) {
-      setSaleProduct(foundSaleProduct);
+    // Vérifier si le pop-up a déjà été affiché pour le produit en solde
+    const saleProductPopupShown = localStorage.getItem("saleProductPopupShown");
+
+    // Rechercher un produit en solde s'il n'a pas encore été affiché
+    if (!saleProductPopupShown) {
+      const foundSaleProduct = filteredProducts.find((item) => item.enSolde);
+      if (foundSaleProduct) {
+        setSaleProduct(foundSaleProduct);
+        localStorage.setItem("saleProductPopupShown", "true"); // Enregistrer l'état
+      }
     }
   }, [product]);
 
@@ -51,10 +63,11 @@ const Home = () => {
     return (
       sondage?.reponses?.every(response => response.userId !== userId) &&
       sondage.user.userId !== userId &&
-      sondage.user.role === "Admin"
+      sondage.user.role === "Admin" &&
+      sondage.statut === true
     );
   });
-
+  
   const handlePhotoClick = (index) => {
     setSelectedPhotoIndex(index);
   };
