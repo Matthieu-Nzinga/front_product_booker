@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from "react";
 import Header from "../components/Header";
-import { Modal, Box, useMediaQuery, Tooltip, IconButton, Select, MenuItem } from "@mui/material";
+import { Modal, Box, useMediaQuery, Tooltip, IconButton} from "@mui/material";
 import SondageForm from "../components/SondageForm";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllSondages } from "../features/products/products";
+import { getAllSondages, showAndHideSondage } from "../features/products/products";
 import Table from "../components/Table";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { format, parseISO } from "date-fns";
 import SondageDetailsModal from "../components/SondageDetailsModal";
 import { getAllUsers } from "../features/users/userSlice";
-import { ToastContainer } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
+import ArchiveIcon from "@mui/icons-material/Archive";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
-const getColumns = (handleViewDetails, isMobile) => [
+const getColumns = (handleViewDetails,handleArchive, handleActivate, isMobile) => [
   { field: "nom_produit", headerName: "Nom du produit", width: 150 },
   { field: "description", headerName: "Description", width: 150 },
   { field: "message", headerName: "Message", width: 150 },
@@ -32,6 +34,19 @@ const getColumns = (handleViewDetails, isMobile) => [
             <VisibilityIcon />
           </IconButton>
         </Tooltip>
+        {params.row.statut ? (
+          <Tooltip title="Archiver le sondage">
+            <IconButton color="error" onClick={() => handleArchive(params.row.id)}>
+              <ArchiveIcon />
+            </IconButton>
+          </Tooltip>
+        ) : (
+            <Tooltip color="success" title="Activer le sondage">
+            <IconButton onClick={() => handleActivate(params.row.id)}>
+              <CheckCircleIcon />
+            </IconButton>
+          </Tooltip>
+        )}
       </div>
     ),
   },
@@ -48,7 +63,6 @@ const Sondage = () => {
   const [selectedSondage, setSelectedSondage] = useState(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const { user } = useSelector((state) => state.users);
-  const [filterRole, setFilterRole] = useState("all"); // Valeur par défaut
   const filteredRole = useSelector((state) => state.products.filteredRole);
 
   const handleOpenDetails = (sondage) => {
@@ -64,9 +78,35 @@ const Sondage = () => {
     const detailsSondage = sondages.find(sondage => sondage.id === sondagedet.id)
     handleOpenDetails(detailsSondage);
   };
+  const handleArchive = async (id) => {
+    // Logique pour archiver le sondage
+    const body = {
+      statut: false,
+    }
+   
+    try {
+      await dispatch(showAndHideSondage({ id, body }));
+      toast.success("Sondage archivé avec succès");
+      dispatch(getAllSondages());
+    } catch (error) {
+      toast.error("Échec");
+    }
+  };
 
-  const handleFilterChange = (event) => {
-    setFilterRole(event.target.value);
+  const handleActivate = async (id) => {
+    // Logique pour activer le sondage
+    const body = {
+      statut: true,
+    }
+
+    try {
+      await dispatch(showAndHideSondage({ id, body }));
+      toast.success("Sondage activé avec succès");
+      dispatch(getAllSondages());
+    } catch (error) {
+      toast.error("Échec");
+    }
+
   };
 
   useEffect(() => {
@@ -82,13 +122,13 @@ const Sondage = () => {
     }
     return true; // Si aucun filtre n'est appliqué, afficher tous les sondages
   });
-
   const rows = filteredSondages
     .map((sondage) => ({
       id: sondage.id,
       nom_produit: sondage.nom_produit,
       description: sondage.description,
       message: sondage.question,
+      statut: sondage?.statut,
       prix: sondage?.prix
         ? `${parseFloat(sondage.prix).toFixed(2)} €`
         : "Non spécifié",
@@ -120,7 +160,7 @@ const Sondage = () => {
 
         <Table
           rows={rows}
-          columns={() => getColumns(handleViewDetails, isMobile)}
+          columns={() => getColumns(handleViewDetails, handleArchive, handleActivate, isMobile)}
           isMobile={isMobile}
           sx={{
             "& .MuiDataGrid-cell": {

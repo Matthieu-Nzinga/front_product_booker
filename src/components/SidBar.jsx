@@ -95,7 +95,7 @@ const SidBar = () => {
                 expandIcon={<ExpandMoreIcon className="text-black" />}
                 aria-controls="panel1a-content"
                 id="panel1a-header"
-                className="p-0"
+                Style={{ pandding: 0 }}
                 sx={{
                   backgroundColor: 'transparent',
                   boxShadow: 'none'
