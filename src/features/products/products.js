@@ -15,6 +15,7 @@ import {
   PRODUCTS,
   PUT_COMMANDS,
   PUT_PRODUCT,
+  SHOW_AND_HIDE_SONDAGE,
   SHOW_POPUP_SONDAGE,
   SHOW_PRODUCT,
   UPDATE_COMMAND,
@@ -241,6 +242,18 @@ export const ProductUnsale = createAsyncThunk(
     try {
       const response = await api.put(PRODUCT_UNSALE + idProduit);
       return response.data.produit;
+    } catch (error) {
+      return thunkApi.rejectWithValue(error);
+    }
+  }
+);
+export const showAndHideSondage = createAsyncThunk(
+  "put/showAndHideSondage",
+  async ({ id, body }, thunkApi) => {
+ 
+    try {
+      const response = await api.put(SHOW_AND_HIDE_SONDAGE + id, body);
+    return response.data.sondage;
     } catch (error) {
       return thunkApi.rejectWithValue(error);
     }
@@ -481,6 +494,21 @@ const products = createSlice({
         }
       })
       .addCase(hidePopuSondage.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      })
+      .addCase(showAndHideSondage.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(showAndHideSondage.fulfilled, (state, action) => {
+        const index = state.sondages.findIndex(
+          (sondage) => sondage.id === action.payload.id
+        );
+        if (index !== -1) {
+          state.sondages[index].statut = action.payload.statut;
+        }
+      })
+      .addCase(showAndHideSondage.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.error.message;
       })
