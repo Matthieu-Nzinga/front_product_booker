@@ -24,7 +24,7 @@ import "react-toastify/dist/ReactToastify.css";
 const statusColors = {
   "En attente": "#F4BD13",
   Livré: "green",
-  "En cours": "black", // Changer la couleur pour "En cours"
+  "En cours": "black",
   Annulé: "red",
 };
 
@@ -36,6 +36,11 @@ const columns = (isMobile, handleViewDetails) => [
     width: isMobile ? 100 : 260,
   },
   { field: "prixTotal", headerName: "Prix total", width: isMobile ? 100 : 150 },
+  {
+    field: "numero_commande",
+    headerName: "Numéro de la commande",
+    width: isMobile ? 100 : 150,
+  },
   {
     field: "statut",
     headerName: "Statut",
@@ -50,12 +55,11 @@ const columns = (isMobile, handleViewDetails) => [
     field: "action",
     headerName: "Action",
     width: isMobile ? 100 : 120,
-    renderCell: (params) =>
-      params.row.statut !== "Annulé" && (
-        <IconButton onClick={() => handleViewDetails(params.row.id)}>
-          <VisibilityIcon />
-        </IconButton>
-      ),
+    renderCell: (params) => (
+      <IconButton onClick={() => handleViewDetails(params.row.id)}>
+        <VisibilityIcon />
+      </IconButton>
+    ),
   },
 ];
 
@@ -64,7 +68,7 @@ const Commands = () => {
   const dispatch = useDispatch();
   const [selectedCommand, setSelectedCommand] = useState(null);
   const [open, setOpen] = useState(false);
-  const [status, setStatus] = useState(""); // Ajouter l'état pour le statut
+  const [status, setStatus] = useState("");
   const isMobile = useMediaQuery("(max-width: 640px)");
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -72,19 +76,16 @@ const Commands = () => {
     dispatch(getAllCommands());
   }, [dispatch]);
 
-  // Filtrer et trier les commandes
   const sortedCommands = commands.slice().sort((a, b) => {
-    // Priorité sur les statuts
     const statusOrder = { "En attente": 1, "En cours": 2, Livré: 3 };
 
-    const statusA = statusOrder[a.status] || 4; // 4 pour tout autre statut
+    const statusA = statusOrder[a.status] || 4;
     const statusB = statusOrder[b.status] || 4;
 
     if (statusA !== statusB) {
-      return statusA - statusB; // Trier d'abord par statut
+      return statusA - statusB;
     }
 
-    // Si les statuts sont les mêmes, trier par date (le plus récent en premier)
     return new Date(b.createdAt) - new Date(a.createdAt);
   });
 
@@ -94,6 +95,7 @@ const Commands = () => {
       ? format(new Date(command.createdAt), "dd/MM/yyyy")
       : "N/A",
     nombreProduits: (command.reservations && command.reservations.length) || 0,
+    numero_commande: command.numero_commande || "Non spécifié",
     prixTotal: command.total_commande + " €",
     statut: command.status || "N/A",
   }));
@@ -102,14 +104,15 @@ const Commands = () => {
     const command = commands.find((cmd) => cmd.id === commandId);
     if (command) {
       setSelectedCommand(command);
-      setStatus(command.status); // Initialiser le statut avec la valeur de la commande
+      setStatus(command.status);
       setOpen(true);
     }
   };
+
   const handleCloseModal = () => {
     setOpen(false);
     setSelectedCommand(null);
-    setStatus(""); // Réinitialiser le statut lorsque la modal est fermée
+    setStatus("");
   };
 
   const handleStatusChange = (event) => {
@@ -119,7 +122,7 @@ const Commands = () => {
   const handleUpdateStatus = async () => {
     if (!selectedCommand) return;
 
-    setIsUpdating(true); // Début du chargement
+    setIsUpdating(true);
 
     try {
       await dispatch(putCommand({ id: selectedCommand.id, status })).unwrap();
@@ -129,7 +132,7 @@ const Commands = () => {
     } catch (error) {
       toast.error("Échec de la mise à jour du statut");
     } finally {
-      setIsUpdating(false); // Fin du chargement
+      setIsUpdating(false);
     }
   };
 
@@ -145,9 +148,8 @@ const Commands = () => {
       </div>
       <Modal open={open} onClose={handleCloseModal}>
         <Box
-          className={`absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%] bg-white p-4 rounded-lg shadow-lg ${
-            isMobile ? "w-[90vw]" : "w-[400px]"
-          }`}
+          className={`absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%] bg-white p-4 rounded-lg shadow-lg ${isMobile ? "w-[90vw]" : "w-[400px]"
+            }`}
           sx={{
             maxHeight: isMobile ? "80vh" : "80vh",
             overflowY: "auto",
@@ -173,12 +175,12 @@ const Commands = () => {
               <Typography variant="subtitle1" className="text-lg font-medium">
                 Prix total: {selectedCommand.total_commande} €
               </Typography>
-              <Typography variant="subtitle1" className="text-lg font-medium">
-                Statut: {selectedCommand.status}
-              </Typography>
 
               <div className="mt-6">
-                <Typography variant="h6" className="text-2xl font-semibold">
+                <Typography
+                  variant="h6"
+                  className="text-2xl font-semibold"
+                >
                   Informations du client
                 </Typography>
                 <Typography variant="subtitle1" className="text-lg font-medium">
@@ -192,7 +194,7 @@ const Commands = () => {
                   Email: {selectedCommand.user.email}
                 </Typography>
               </div>
-              {/* Afficher les détails des produits */}
+
               <div className="mt-6">
                 <Typography variant="h6" className="text-2xl font-semibold">
                   Les Produits de la commande
@@ -203,9 +205,10 @@ const Commands = () => {
                       variant="subtitle1"
                       className="text-lg font-medium"
                     >
-                     <strong> {reservation.produit.nom_produit}</strong>:{" "} <br />
-                     - Prix : {reservation.produit.prix_par_unite} € <br />
-                     - Quanité commandée : {reservation.quantite_commande}
+                      <strong>{reservation.produit.nom_produit}</strong>:{" "}
+                      <br />
+                      - Prix : {reservation.produit.prix_par_unite} € <br />
+                      - Quanité commandée : {reservation.quantite_commande}
                     </Typography>
                   </div>
                 ))}
@@ -218,6 +221,13 @@ const Commands = () => {
                     className="text-lg font-medium"
                   >
                     Cette commande a déjà été livrée
+                  </Typography>
+                ) : selectedCommand.status === "Annulé" ? (
+                  <Typography
+                    variant="subtitle1"
+                    className="text-lg font-medium"
+                  >
+                    Cette commande a été annulée
                   </Typography>
                 ) : (
                   <FormControl fullWidth>
@@ -235,19 +245,22 @@ const Commands = () => {
                 )}
               </div>
 
-              {selectedCommand.status !== "Livré" && (
-                <div className="mt-6">
-                  <Button
-                    onClick={handleUpdateStatus}
-                    variant="contained"
-                    color="primary"
-                    className="mt-4 w-full"
-                    disabled={isUpdating}
-                  >
-                    {isUpdating ? "Modification en cours..." : "Modifier"}
-                  </Button>
-                </div>
-              )}
+              {selectedCommand.status !== "Livré" &&
+                selectedCommand.status !== "Annulé" && (
+                  <div className="mt-6">
+                    <Button
+                      onClick={handleUpdateStatus}
+                      variant="contained"
+                      color="primary"
+                      className="mt-4 w-full"
+                      disabled={isUpdating}
+                    >
+                      {isUpdating
+                        ? "Modification en cours..."
+                        : "Modifier"}
+                    </Button>
+                  </div>
+                )}
             </div>
           )}
         </Box>

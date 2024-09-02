@@ -8,13 +8,13 @@ import {
   FormControlLabel,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import { useDispatch } from "react-redux";
-import { getAllSondages, postReponse } from "../features/products/products";
+import { getAllSondages, hidePopuSondage, postReponse, showPopuSondage } from "../features/products/products";
 import { toast } from "react-toastify";
 
-const SondageDetailsModal = ({ sondage, open, onClose }) => {
+const SondageDetailsModal = ({ sondage, open, onClose, users }) => {
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
   const [response, setResponseState] = useState(""); // Pour gérer la réponse Oui/Non
   const token = localStorage.getItem("token");
@@ -23,24 +23,33 @@ const SondageDetailsModal = ({ sondage, open, onClose }) => {
   const userRole = decodedToken.role;
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
+  const [userResponses, setUserResponses] = useState({ for: [], against: [] });
 
-  if (!sondage) return null;
+  useEffect(() => {
+    if (sondage && users) {
+      const usersFor = [];
+      const usersAgainst = [];
 
-  // Calculer le nombre total de réponses et la répartition entre "Pour" et "Contre"
-  const totalResponses = sondage.reponses?.length || 0;
-  const countFor =
-    sondage.reponses?.filter((r) => r.reponse === true).length || 0;
-  const countAgainst = totalResponses - countFor;
+      sondage.reponses.forEach((response) => {
+        const user = users.find((user) => user.id === response.userId);
+        if (response.reponse) {
+          usersFor.push(user);
+        } else {
+          usersAgainst.push(user);
+        }
+      });
 
+      setUserResponses({ for: usersFor, against: usersAgainst });
+
+    }
+  }, [sondage, users]);
   const handlePhotoClick = (index) => {
     setSelectedPhotoIndex(index);
   };
 
   const handleResponseChange = (event) => {
-    const newResponse = event.target.value;
-    setResponseState(newResponse);
+    setResponseState(event.target.value);
   };
-
   const handleSave = async () => {
     if (response) {
       setLoading(true); // Activer l'état de chargement
@@ -64,6 +73,36 @@ const SondageDetailsModal = ({ sondage, open, onClose }) => {
     }
   };
 
+  if (!sondage) return null;
+
+  const totalResponses = sondage.reponses?.length || 0;
+  const countFor = userResponses.for.length;
+  const countAgainst = userResponses.against.length;
+
+  const handleShowPopup = async () => {
+    setLoading(true); // Active le chargement
+    try {
+      await dispatch(showPopuSondage(sondage.id));
+      toast.success("Activation réussie");
+      dispatch(getAllSondages());
+    } catch (error) {
+      toast.error("Échec d'activation");
+    } finally {
+      setLoading(false); // Désactive le chargement après l'opération
+    }
+  };
+  const handleHidePopup = async () => {
+    setLoading(true); // Active le chargement
+    try {
+      await dispatch(hidePopuSondage(sondage.id));
+      toast.success(" Désactvation  réussie");
+      dispatch(getAllSondages());
+    } catch (error) {
+      toast.error("Échec de modification");
+    } finally {
+      setLoading(false); // Désactive le chargement après l'opération
+    }
+  };
   return (
     <Modal open={open} onClose={onClose}>
       <Box
@@ -74,13 +113,14 @@ const SondageDetailsModal = ({ sondage, open, onClose }) => {
           transform: "translate(-50%, -50%)",
           width: "80%",
           maxWidth: 500,
+          maxHeight: "80vh", // Hauteur maximale de la modal pour éviter de dépasser la vue
           bgcolor: "background.paper",
           borderRadius: 2,
           boxShadow: 24,
           p: 4,
+          overflowY: "auto", // Activer le défilement vertical si le contenu dépasse
         }}
       >
-        {/* Close Button */}
         <IconButton
           onClick={onClose}
           sx={{
@@ -91,65 +131,70 @@ const SondageDetailsModal = ({ sondage, open, onClose }) => {
         >
           <CloseIcon />
         </IconButton>
-
-        {/* Display number of responses and distribution */}
+        {/* Affichage du nombre de réponses et de la répartition */}
         {sondage.reponses && sondage.reponses.length > 0 && (
-          <p>
-            Pour ce produit, il y a {totalResponses} personne(s) qui ont répondu
-            : {countFor} <strong> oui </strong> et {countAgainst} <strong>non.</strong>
-          </p>
+          <div>
+            <p>
+              Pour ce produit, il y a {totalResponses} personne(s) qui ont répondu
+              : {countFor} <strong>oui</strong> et {countAgainst} <strong>non</strong>.
+            </p>
+            <p>
+              <strong>Pour:</strong>
+              <ul>
+                {userResponses.for.map((user, index) => (
+                  <li key={index}>{user.first_name} {user.name}</li>
+                ))}
+              </ul>
+            </p>
+            <p>
+              <strong>Contre:</strong>
+              <ul>
+                {userResponses.against.map((user, index) => (
+                  <li key={index}>{user.first_name} {user.name}</li>
+                ))}
+              </ul>
+            </p>
+          </div>
         )}
-        {/* Display title based on user role */}
         {sondage.user.role === "Client" ? (
           <h2>
-            C'est un produit suggéré par {sondage.user.first_name}{" "}
-            {sondage.user.name}
+            C'est un produit suggéré par {sondage.user.first_name} {sondage.user.name}
           </h2>
         ) : (
-          <h2>{sondage.nom_produit}</h2>
+          <h2><strong>Nom du produit:</strong> {sondage.nom_produit}</h2>
         )}
+        {
+          sondage.user.role === "Client" && (
+            <h2><strong>Nom du produit:</strong> {sondage.nom_produit}</h2>
+          )
+         }
+        <p><strong>Description:</strong> {sondage.description}</p>
+        <p><strong>Message:</strong> {sondage.question}</p>
+        <p><strong>Prix:</strong> {sondage.prix}€</p>
 
-        <p>
-          <strong>Description:</strong> {sondage.description}
-        </p>
-        <p>
-          <strong>Message:</strong> {sondage.question}
-        </p>
-        <p>
-          <strong>Prix:</strong> {sondage.prix}€
-        </p>
-        {/* Radio buttons for roles other than Admin */}
         {userRole !== "Admin" && (
           <RadioGroup value={response} onChange={handleResponseChange}>
-            <FormControlLabel
-              value="oui"
-              control={<Radio color="primary" />}
-              label="Oui"
-            />
-            <FormControlLabel
-              value="non"
-              control={<Radio color="primary" />}
-              label="Non"
-            />
+            <FormControlLabel value="oui" control={<Radio color="primary" />} label="Oui" />
+            <FormControlLabel value="non" control={<Radio color="primary" />} label="Non" />
           </RadioGroup>
         )}
-        {/* Save Button */}
+
         {userRole !== "Admin" && (
           <Button
             variant="contained"
             color="primary"
             onClick={handleSave}
-            disabled={loading} // Désactiver le bouton pendant le chargement
+            disabled={loading}
             sx={{ marginTop: 2 }}
           >
             {loading ? "Enregistrement en cours..." : "Sauvegarder"}
           </Button>
         )}
+
         <div>
           <strong>Photos:</strong>
           {sondage.urlsPhotos && sondage.urlsPhotos.length > 0 ? (
             <div>
-              {/* Buttons to select photos */}
               <div>
                 {sondage.urlsPhotos.map((url, index) => (
                   <Button
@@ -164,7 +209,6 @@ const SondageDetailsModal = ({ sondage, open, onClose }) => {
                 ))}
               </div>
 
-              {/* Display the selected photo */}
               <img
                 src={sondage.urlsPhotos[selectedPhotoIndex]}
                 alt={`Photo ${selectedPhotoIndex + 1}`}
@@ -180,9 +224,32 @@ const SondageDetailsModal = ({ sondage, open, onClose }) => {
           ) : (
             <p>Aucune photo disponible</p>
           )}
+          {decodedToken.role === "Admin" && sondage.user.role === "Admin" && (
+            sondage.pop_up ? (
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleHidePopup}
+                disabled={loading}
+                sx={{ marginTop: 2 }}
+              >
+                {loading ? "En cours..." : "Désactiver la pop up côté client"}
+              </Button>
+            ) : 
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleShowPopup}
+                disabled={loading}
+                sx={{ marginTop: 2 }}
+              >
+                {loading ? "En cours..." : "Activer la pop up côté client"}
+              </Button>
+          )}
         </div>
       </Box>
     </Modal>
+
   );
 };
 

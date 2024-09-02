@@ -131,7 +131,7 @@ const Panier = () => {
           onClick={handleReservation}
           disabled={isLoading || isPanierVide}
         >
-          {isLoading ? "Réservation en cours..." : "TOUT RÉSERVER"}
+          {isLoading ? "Validation en cours..." : "VALIDER VOTRE COMMANDE"}
         </button>
       </div>
       <ToastContainer />

@@ -2,16 +2,17 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { getAllCommands, updateCommand } from '../features/products/products';
+import { getAllCommands, putCommand, updateCommand } from '../features/products/products';
 
 const CommandEdit = ({ command, onClose }) => {
     const { commands } = useSelector((state) => state.products) || [];
     const dispatch = useDispatch();
-    const [isLoading, setIsLoading] = useState(false);
+    const [isUpdating, setIsUpdating] = useState(false); // Etat de chargement pour la mise à jour
+    const [isCancelling, setIsCancelling] = useState(false); // Etat de chargement pour l'annulation
     const [localCommand, setLocalCommand] = useState(command);
 
     const handleUpdate = async () => {
-        setIsLoading(true); // Début de la mise à jour, état de chargement activé
+        setIsUpdating(true); // Début de la mise à jour
 
         const produits = localCommand.reservations.map((reservation) => ({
             produitId: reservation.produit?.id,
@@ -20,31 +21,26 @@ const CommandEdit = ({ command, onClose }) => {
         }));
 
         const updatedData = {
-            id: localCommand.id, // ID de la commande
-            total_commande: parseFloat(formattedTotal), // Convertir le total général en float
-            produits, // Tableau des produits avec les détails
+            id: localCommand.id,
+            total_commande: parseFloat(formattedTotal),
+            produits,
         };
 
         try {
-            // Dispatch l'action pour mettre à jour la commande
             await dispatch(updateCommand(updatedData));
-
-            // Afficher un toast de succès
             toast.success('La commande a été modifiée avec succès !');
-            dispatch(getAllCommands())
-            onClose(); // Fermer le formulaire après la mise à jour réussie
+            dispatch(getAllCommands());
+            onClose();
         } catch (error) {
-            // Afficher un toast d'erreur
             toast.error('Une erreur est survenue lors de la modification de la commande.');
         } finally {
-            setIsLoading(false); // Réinitialisation de l'état de chargement
+            setIsUpdating(false); // Fin de la mise à jour
         }
     };
 
     const handleQuantiteChange = (reservationId, newQuantite) => {
-        if (newQuantite < 1) return; // Éviter les quantités négatives ou nulles
+        if (newQuantite < 1) return;
 
-        // Mettre à jour la quantité dans l'état local
         const updatedReservations = localCommand.reservations.map(reservation =>
             reservation.id === reservationId
                 ? { ...reservation, quantite_commande: newQuantite }
@@ -57,7 +53,7 @@ const CommandEdit = ({ command, onClose }) => {
             total_commande: updatedReservations.reduce(
                 (total, reservation) => total + (reservation.quantite_commande * reservation.produit?.prix_par_unite || 0),
                 0
-            )
+            ),
         };
 
         setLocalCommand(updatedCommand);
@@ -70,11 +66,28 @@ const CommandEdit = ({ command, onClose }) => {
         }
     };
 
-    // Formater le total_commande pour afficher deux chiffres après la virgule
+    const handleCancelCommand = async () => {
+        setIsCancelling(true); // Début de l'annulation
+        try {
+            await dispatch(putCommand({ id: localCommand.id, status: "Annulé" }));
+            dispatch(getAllCommands());
+            toast.success("Commande annulée avec succès.");
+            onClose();
+        } catch (error) {
+            toast.error("Erreur lors de l'annulation de la commande.");
+        } finally {
+            setIsCancelling(false); // Fin de l'annulation
+        }
+    };
+
     const formattedTotal = localCommand.total_commande ? localCommand.total_commande.toFixed(2) : '0.00';
+
+    const isUpdateDisabled = localCommand.status === 'En cours' || localCommand.status === 'Livré' || isUpdating;
+    const isCancelDisabled = localCommand.status === 'En cours' || localCommand.status === 'Livré' || isCancelling;
 
     return (
         <div className="min-h-screen">
+          
             <div className="flex flex-col gap-6">
                 {localCommand.reservations?.map((reservation, index) => (
                     <div
@@ -97,7 +110,7 @@ const CommandEdit = ({ command, onClose }) => {
                                     min="1"
                                     onChange={(event) => handleInputChange(reservation.id, event)}
                                     className="w-20 text-center border rounded-md py-1 px-2"
-                                    disabled={localCommand.status === 'En cours' || localCommand.status === 'Livré'}
+                                    disabled={isUpdateDisabled || isCancelling}
                                 />
                             </div>
                             <p className="text-sm text-gray-600 mt-2">
@@ -113,17 +126,27 @@ const CommandEdit = ({ command, onClose }) => {
                     <span className="text-black text-2xl ml-2">{formattedTotal}€</span>
                 </div>
                 <button
-                    className={`mt-6 sm:mt-0 w-full md:w-[50%] text-white rounded-md mb-5 py-3 px-6 ${localCommand.status === 'En cours' || localCommand.status === 'Livré'
-                            ? 'bg-gray-400 cursor-not-allowed'
-                            : isLoading ? 'bg-gray-500' : 'bg-customBlue'
+                    className={`mt-6 w-full md:w-[60%] text-white rounded-md mb-5 py-3 px-6 ${isUpdateDisabled
+                        ? 'bg-gray-400 cursor-not-allowed'
+                        : 'bg-customBlue'
                         }`}
                     onClick={handleUpdate}
-                    disabled={localCommand.status === 'En cours' || localCommand.status === 'Livré' || isLoading}
+                    disabled={isUpdateDisabled}
                 >
-                    {isLoading ? 'Modification en cours...' : 'Modifier la commande'}
+                    {isUpdating ? 'Modification en cours...' : 'VALIDER LA COMMANDE'}
+                </button>
+                <button
+                    className={`mt-6 w-full md:w-[50%] text-white rounded-md mb-5 py-3 px-6 ${isCancelDisabled
+                        ? 'bg-gray-400 cursor-not-allowed'
+                        : 'bg-red-500'
+                        }`}
+                    onClick={handleCancelCommand}
+                    disabled={isCancelDisabled}
+                >
+                    {isCancelling ? 'Annulation en cours...' : 'Annuler la commande'}
                 </button>
             </div>
-            <ToastContainer />
+           
         </div>
     );
 };

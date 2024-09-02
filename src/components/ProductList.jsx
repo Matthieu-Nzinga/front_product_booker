@@ -27,6 +27,7 @@ import products, {
   getAllProduits,
   hideProduct,
   ProductSale,
+  ProductUnsale,
 } from "../features/products/products";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -55,6 +56,11 @@ const columns = (
   {
     field: "orderedQuantity",
     headerName: "Quantité commandée",
+    width: isMobile ? 100 : 150,
+  },
+  {
+    field: "numero_produit",
+    headerName: "Numéro du produit",
     width: isMobile ? 100 : 150,
   },
   {
@@ -151,6 +157,7 @@ const ProductList = () => {
         statut: p?.statut,
         category: category?.nom || "Non spécifié", // Utiliser le nom de la catégorie ou "Non spécifié"
         urlsPhotos: p?.urlsPhotos || [],
+        numero_produit: p?.numero_produit || "Non spécifié",
       };
     });
 
@@ -233,7 +240,19 @@ const ProductList = () => {
       setIsLoading(false); // Désactive le chargement après l'opération
     }
   };
-
+  const handleFeatureDeactivateProduct = async () => {
+    setIsLoading(true); // Active le chargement
+    try {
+      await dispatch(ProductUnsale(selectedProduct.id));
+      toast.success("Produit désactver comme à la une avec succès");
+      dispatch(getAllProduits());
+      setViewDetailsOpen(false); // Ferme le modal si l'opération réussit
+    } catch (error) {
+      toast.error("Échec de modification");
+    } finally {
+      setIsLoading(false); // Désactive le chargement après l'opération
+    }
+  };
   return (
     <div className="px-8 mt-28 flex flex-col gap-5 sm:pr-9">
       <ToastContainer />
@@ -402,7 +421,7 @@ const ProductList = () => {
             </div>
           )}
           {/* Add the button at the end of the modal */}
-          {!selectedProduct?.enSolde && (
+          {!selectedProduct?.enSolde ? (
             <div className="flex flex-col items-center mt-4">
               <Button
                 variant="contained"
@@ -413,7 +432,16 @@ const ProductList = () => {
                 {isLoading ? "En cours..." : "Marquer comme produit à la une"}
               </Button>
             </div>
-          )}
+          ) : <div className="flex flex-col items-center mt-4">
+            <Button
+              variant="contained"
+              color="primary"
+                onClick={handleFeatureDeactivateProduct}
+              disabled={isLoading} // Désactive le bouton pendant le chargement
+            >
+              {isLoading ? "En cours..." : "Désactiver comme produit à la une"}
+            </Button>
+          </div> }
         </Box>
       </Modal>
 

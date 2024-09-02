@@ -4,15 +4,19 @@ import {
   GET_CATEGORIES,
   GET_COMMANDS,
   GET_SONDAGE,
+  HIDE_POPUP_SONDAGE,
   HIDE_PRODUCT,
   POST_COMMANDS,
   POST_PRODUCTS,
   POST_REPONSE,
   POST_SONDAGE,
   PRODUCT_SALE,
+  PRODUCT_UNSALE,
   PRODUCTS,
   PUT_COMMANDS,
   PUT_PRODUCT,
+  SHOW_AND_HIDE_SONDAGE,
+  SHOW_POPUP_SONDAGE,
   SHOW_PRODUCT,
   UPDATE_COMMAND,
 } from "../../config";
@@ -115,6 +119,7 @@ export const putCommand = createAsyncThunk(
       const response = await api.put(PUT_COMMANDS + id, { status });
       return response.data.commande;
     } catch (error) {
+      console.log(error)
       return thunkApi.rejectWithValue(error);
     }
   }
@@ -154,7 +159,7 @@ export const activateProduct = createAsyncThunk(
 );
 export const updateCommand = createAsyncThunk(
   "put/updateCommand",
-  async(updatedData,thunkApi) => {
+  async (updatedData, thunkApi) => {
     try {
       const response = await api.put(UPDATE_COMMAND + updatedData.id, updatedData);
       return response.data.commande;
@@ -209,18 +214,69 @@ export const ProductSale = createAsyncThunk(
     }
   }
 );
+export const showPopuSondage = createAsyncThunk(
+  "put/showPopuSondage",
+  async (idSondage, thunkApi) => {
+    try {
+      const response = await api.put(SHOW_POPUP_SONDAGE + idSondage);
+      return response.data.sondage;
+    } catch (error) {
+      return thunkApi.rejectWithValue(error);
+    }
+  }
+);
+export const hidePopuSondage = createAsyncThunk(
+  "put/hidePopuSondage",
+  async (idSondage, thunkApi) => {
+    try {
+      const response = await api.put(HIDE_POPUP_SONDAGE + idSondage);
+      return response.data.sondage;
+    } catch (error) {
+      return thunkApi.rejectWithValue(error);
+    }
+  }
+);
+export const ProductUnsale = createAsyncThunk(
+  "put/ProductUnsale",
+  async (idProduit, thunkApi) => {
+    try {
+      const response = await api.put(PRODUCT_UNSALE + idProduit);
+      return response.data.produit;
+    } catch (error) {
+      return thunkApi.rejectWithValue(error);
+    }
+  }
+);
+export const showAndHideSondage = createAsyncThunk(
+  "put/showAndHideSondage",
+  async ({ id, body }, thunkApi) => {
+ 
+    try {
+      const response = await api.put(SHOW_AND_HIDE_SONDAGE + id, body);
+    return response.data.sondage;
+    } catch (error) {
+      return thunkApi.rejectWithValue(error);
+    }
+  }
+);
 const initialState = {
   product: [],
   categories: [],
   commands: [],
   sondages : [],
   error: null,
+  filteredRole: null,
 };
 
 const products = createSlice({
   name: "products",
   initialState,
-  reducers: {},
+  reducers: {
+    // Ajout d'un reducer pour mettre à jour filteredRole
+    setFilteredRole: (state, action) => {
+      state.filteredRole = action.payload
+    }
+  },
   extraReducers(builder) {
     builder
       .addCase(getAllProduits.pending, (state) => {
@@ -396,8 +452,70 @@ const products = createSlice({
         state.status = "failed";
         state.error = action.error.message;
       })
+      .addCase(ProductUnsale.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(ProductUnsale.fulfilled, (state, action) => {
+        const index = state.product.findIndex(
+          (order) => order.id === action.payload.id
+        );
+        if (index !== -1) {
+          state.product[index].enSolde = action.payload.enSolde;
+        }
+      })
+      .addCase(ProductUnsale.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      })
+      .addCase(showPopuSondage.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(showPopuSondage.fulfilled, (state, action) => {
+        const index = state.sondages.findIndex(
+          (sondage) => sondage.id === action.payload.id
+        );
+        if (index !== -1) {
+          state.sondages[index].pop_up = action.payload.pop_up;
+        }
+      })
+      .addCase(showPopuSondage.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      })
+      .addCase(hidePopuSondage.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(hidePopuSondage.fulfilled, (state, action) => {
+        const index = state.sondages.findIndex(
+          (sondage) => sondage.id === action.payload.id
+        );
+        if (index !== -1) {
+          state.sondages[index].pop_up = action.payload.pop_up;
+        }
+      })
+      .addCase(hidePopuSondage.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      })
+      .addCase(showAndHideSondage.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(showAndHideSondage.fulfilled, (state, action) => {
+        const index = state.sondages.findIndex(
+          (sondage) => sondage.id === action.payload.id
+        );
+        if (index !== -1) {
+          state.sondages[index].statut = action.payload.statut;
+        }
+      })
+      .addCase(showAndHideSondage.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      })
     
   },
 });
+
+export const { setFilteredRole } = products.actions;
 
 export default products.reducer;
