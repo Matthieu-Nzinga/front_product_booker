@@ -40,7 +40,7 @@ const columns = (isMobile, handleEditCommand, handleViewDetails) => [
     renderCell: (params) => (
       <>
         {
-          params.row.statut !== "Annulé" && (
+          (
             <Tooltip title="Détails de la commande">
               <IconButton onClick={() => handleViewDetails(params.row.id)}>
                 <VisibilityIcon style={{ fontSize: 20 }} />

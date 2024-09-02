@@ -252,12 +252,18 @@ const initialState = {
   commands: [],
   sondages : [],
   error: null,
+  filteredRole: null,
 };
 
 const products = createSlice({
   name: "products",
   initialState,
-  reducers: {},
+  reducers: {
+    // Ajout d'un reducer pour mettre à jour filteredRole
+    setFilteredRole: (state, action) => {
+      state.filteredRole = action.payload
+    }
+  },
   extraReducers(builder) {
     builder
       .addCase(getAllProduits.pending, (state) => {
@@ -481,5 +487,7 @@ const products = createSlice({
     
   },
 });
+
+export const { setFilteredRole } = products.actions;
 
 export default products.reducer;
