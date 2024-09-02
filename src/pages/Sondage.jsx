@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Header from "../components/Header";
-import { Modal, Box, useMediaQuery, Tooltip, IconButton} from "@mui/material";
+import { Modal, Box, useMediaQuery, Tooltip, IconButton, Button} from "@mui/material";
 import SondageForm from "../components/SondageForm";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllSondages, showAndHideSondage } from "../features/products/products";
@@ -12,6 +12,8 @@ import { getAllUsers } from "../features/users/userSlice";
 import { toast, ToastContainer } from "react-toastify";
 import ArchiveIcon from "@mui/icons-material/Archive";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 const getColumns = (handleViewDetails,handleArchive, handleActivate, isMobile) => [
   { field: "nom_produit", headerName: "Nom du produit", width: 150 },
@@ -141,21 +143,56 @@ const Sondage = () => {
         ? format(parseISO(sondage.createdAt), "dd/MM/yyyy HH:mm")
         : "N/A",
     }));
+  
+  // Fonction pour exporter les données en PDF
+  const exportPDF = () => {
+    const doc = new jsPDF();
+    const columns = [
+      { header: "Nom du produit", dataKey: "nom_produit" },
+      { header: "Description", dataKey: "description" },
+      { header: "Message", dataKey: "message" },
+      { header: "Prix", dataKey: "prix" },
+      { header: "Date", dataKey: "createdAt" },
+    ];
+
+    doc.autoTable({
+      columns,
+      body: rows,
+      margin: { top: 10 },
+      styles: {
+        fontSize: 8,
+        cellPadding: 2,
+        valign: "middle",
+      },
+      headStyles: {
+        fillColor: [52, 73, 94], // Couleur du header
+      },
+    });
+
+    doc.save("sondages.pdf");
+  };
+
 
   return (
     <div>
       <Header text={"Les Sondages"} />
       <ToastContainer />
       <div className="px-8">
-        <div className="flex justify-end items-center mt-28">
-          <div>
-            <button
-              className="text-center mb-4 font-semibold text-base bg-customBlue px-[93px] text-white py-3 hover:bg-blue-600 rounded-xl"
-              onClick={handleOpen}
-            >
-              Créer un sondage
-            </button>
-        </div>
+        <div className="flex justify-between items-center mt-28">
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={exportPDF}
+            sx={{ marginLeft: 2 }}
+          >
+            Exporter en format PDF
+          </Button>
+          <button
+            className="text-center mb-4 font-semibold text-base bg-customBlue px-[93px] text-white py-3 hover:bg-blue-600 rounded-xl"
+            onClick={handleOpen}
+          >
+            Créer un sondage
+          </button>
         </div>
 
         <Table
