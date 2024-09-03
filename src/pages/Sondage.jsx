@@ -177,18 +177,22 @@ const Sondage = () => {
     <div>
       <Header text={"Les Sondages"} />
       <ToastContainer />
-      <div className="px-8">
-        <div className="flex justify-between items-center mt-28">
+      <div className="px-4 sm:px-8">
+        <div className="flex flex-col sm:flex-row justify-between items-center mt-28 space-y-4 sm:space-y-0">
           <Button
             variant="contained"
             color="primary"
             onClick={exportPDF}
-            sx={{ marginLeft: 2 }}
+            sx={{
+              marginLeft: { xs: 0, sm: 2 },
+              width: { xs: '100%', sm: 'auto' },
+              marginBottom: { xs: 2, sm: 0 },
+            }}
           >
             Exporter en format PDF
           </Button>
           <button
-            className="text-center mb-4 font-semibold text-base bg-customBlue px-[93px] text-white py-3 hover:bg-blue-600 rounded-xl"
+            className="w-full sm:w-auto text-center font-semibold text-base bg-customBlue px-6 py-3 text-white hover:bg-blue-600 rounded-xl"
             onClick={handleOpen}
           >
             Créer un sondage
@@ -197,7 +201,9 @@ const Sondage = () => {
 
         <Table
           rows={rows}
-          columns={() => getColumns(handleViewDetails, handleArchive, handleActivate, isMobile)}
+          columns={() =>
+            getColumns(handleViewDetails, handleArchive, handleActivate, isMobile)
+          }
           isMobile={isMobile}
           sx={{
             "& .MuiDataGrid-cell": {
@@ -227,19 +233,20 @@ const Sondage = () => {
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: { xs: '90%', sm: 400 },
-            maxHeight: '80vh',
+            width: { xs: "90%", sm: 400 },
+            maxHeight: "80vh",
             bgcolor: "background.paper",
             borderRadius: 2,
             boxShadow: 24,
             p: 4,
-            overflowY: 'auto',
+            overflowY: "auto",
           }}
         >
           <SondageForm handleClose={handleClose} title="Créer un sondage" />
         </Box>
       </Modal>
     </div>
+
   );
 };
 
