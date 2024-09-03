@@ -22,12 +22,17 @@ import DetailsProduct from "./pages/DetailsProduct";
 import Commands from "./pages/Commands";
 import Sondage from "./pages/Sondage";
 import ShowSondage from "./pages/ShowSondage";
+import ResetPassword from "./pages/ResetPassword";
 
 
 const unAuthRoutes = [
   {
     path: "/",
     element: <Login />,
+  },
+  {
+    path: "/reset-password",
+    element: <ResetPassword />,
   },
 ];
 
