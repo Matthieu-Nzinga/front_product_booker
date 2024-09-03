@@ -20,7 +20,7 @@ const SondageDetailsModal = ({ sondage, open, onClose, users }) => {
   const token = localStorage.getItem("token");
   const decodedToken = jwtDecode(token);
   const userId = decodedToken.id;
-  const userRole = decodedToken.role;
+  const userRole = decodedToken.role;  
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const [userResponses, setUserResponses] = useState({ for: [], against: [] });
