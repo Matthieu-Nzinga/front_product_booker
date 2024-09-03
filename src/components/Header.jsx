@@ -1,23 +1,27 @@
 import React, { useState } from "react";
-import { IoNotificationsOutline } from "react-icons/io5";
 import { PiUserCircleLight } from "react-icons/pi";
-import { useSelector, useDispatch } from "react-redux";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import {  useDispatch } from "react-redux";
+import {  NavLink, useNavigate } from "react-router-dom";
 import { removeToken } from "../features/authUtils";
 import { removeTokenAction } from "../features/auth/authSlice";
-import { Drawer, IconButton } from "@mui/material";
+import { Accordion, AccordionDetails, AccordionSummary, Drawer, IconButton } from "@mui/material";
 import { MdOutlineDashboard } from "react-icons/md";
-import { GiCardboardBoxClosed, GiCardboardBox } from "react-icons/gi";
+import { GiCardboardBoxClosed} from "react-icons/gi";
 import { LuShoppingCart, LuUsers2 } from "react-icons/lu";
 import { IoIosLogOut } from "react-icons/io";
+import { setFilteredRole } from "../features/products/products";
+import { RiSurveyLine } from "react-icons/ri";
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+
 
 const Header = ({ text }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [image] = useState(false); 
-  const token = useSelector((state) => state.auth.token);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [activeLink, setActiveLink] = useState(""); // État pour gérer le lien actif
+
 
   const handleDropdownToggle = () => {
     setDropdownOpen(!dropdownOpen);
@@ -31,6 +35,17 @@ const Header = ({ text }) => {
     removeToken();
     dispatch(removeTokenAction());
     navigate('/');
+  };
+
+
+  const handleRoleChangeAdmin = () => {
+    dispatch(setFilteredRole("Admin"));
+    setActiveLink("admin"); // Met à jour le lien actif
+  };
+
+  const handleRoleChangeClient = () => {
+    dispatch(setFilteredRole("Client"));
+    setActiveLink("client"); // Met à jour le lien actif
   };
 
   return (
@@ -117,7 +132,7 @@ const Header = ({ text }) => {
             className="flex items-center gap-2 p-3  hover:bg-gray-100"
             onClick={handleMenuToggle}
           >
-            <GiCardboardBoxClosed size={25} /> Produits
+            <GiCardboardBoxClosed size={25} /> Produits 
           </NavLink>
           <NavLink
             to="/Commandes"
@@ -126,13 +141,6 @@ const Header = ({ text }) => {
           >
             <LuShoppingCart size={25} /> Commandes
           </NavLink>
-          {/* <NavLink
-            to="/stock"
-            className="flex items-center gap-2 p-3 hover:bg-gray-100"
-            onClick={handleMenuToggle}
-          >
-            <GiCardboardBox size={25} /> Gestion de stock
-          </NavLink> */}
           <NavLink
             to="/utilisateurs"
             className="flex items-center gap-2 p-3  hover:bg-gray-100"
@@ -140,6 +148,50 @@ const Header = ({ text }) => {
           >
             <LuUsers2 size={25} /> Utilisateurs
           </NavLink>
+          <Accordion
+            className="border rounded-xl bg-transparent"
+            disableGutters
+            sx={{
+              backgroundColor: 'transparent',
+              boxShadow: 'none',
+              border: 'none'
+            }}
+          >
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon className="text-black" />}
+              aria-controls="panel1a-content"
+              id="panel1a-header"
+              Style={{ pandding: 0 }}
+              sx={{
+                backgroundColor: 'transparent',
+                boxShadow: 'none'
+              }}
+            >
+              <li className="flex items-center gap-2 p-3 w-full">
+                <RiSurveyLine size={25} /> Sondages
+              </li>
+            </AccordionSummary>
+            <AccordionDetails className="pl-4">
+              <ul className="flex flex-col gap-2">
+                <NavLink to="/sondage">
+                  <li
+                    className={`cursor-pointer p-2 rounded-xl ${activeLink === "client" ? "bg-customBlue text-white" : "hover:bg-customBlue"}`}
+                    onClick={handleRoleChangeClient}
+                  >
+                    Suggestions des clients
+                  </li>
+                </NavLink>
+                <NavLink to="/sondage">
+                  <li
+                    className={`cursor-pointer p-2 rounded-xl ${activeLink === "admin" ? "bg-customBlue text-white" : "hover:bg-customBlue"}`}
+                    onClick={handleRoleChangeAdmin}
+                  >
+                    Vos sondages
+                  </li>
+                </NavLink>
+              </ul>
+            </AccordionDetails>
+          </Accordion>
           <button
             onClick={handleLogout}
             className={({ isActive }) =>
