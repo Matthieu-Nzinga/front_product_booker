@@ -1,7 +1,7 @@
 
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
-import { LOGIN } from '../../config';
+import { LOGIN, RESET_PASSWORD } from '../../config';
 
 export const userLogin = createAsyncThunk(
   'auth/userLogin',
@@ -13,6 +13,19 @@ export const userLogin = createAsyncThunk(
       localStorage.setItem('token', response.data.token);
       return response.data;
     } catch (error) {
+      return thunkApi.rejectWithValue(error.response.data);
+    }
+  }
+);
+export const resetPassword = createAsyncThunk(
+  'auth/resetPassword',
+  async (data, thunkApi) => {
+
+    try {
+      const response = await axios.post(RESET_PASSWORD, data);
+      return response.data;
+    } catch (error) {
+      console.log(error)
       return thunkApi.rejectWithValue(error.response.data);
     }
   }
@@ -47,6 +60,16 @@ const authSlice = createSlice({
         state.token = action.payload.token; 
       })
       .addCase(userLogin.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload;
+      })
+      .addCase(resetPassword.pending, (state) => {
+        state.status = 'loading';
+      })
+      .addCase(resetPassword.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+      })
+      .addCase(resetPassword.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload;
       });
