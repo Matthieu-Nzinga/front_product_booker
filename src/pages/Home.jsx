@@ -6,6 +6,7 @@ import { Box, Button, FormControlLabel, IconButton, Modal, Radio, RadioGroup, Ty
 import { jwtDecode } from "jwt-decode";
 import CloseIcon from "@mui/icons-material/Close";
 import { toast, ToastContainer } from "react-toastify";
+import { getAllUsers } from "../features/users/userSlice";
 
 const Home = () => {
   const { product, sondages } = useSelector((state) => state.products);
@@ -16,6 +17,7 @@ const Home = () => {
   const [response, setResponseState] = useState("");
   const [loading, setLoading] = useState(false);
   const [isSondageSaved, setIsSondageSaved] = useState(false);
+  const { user } = useSelector((state) => state.users);
 
   const token = localStorage.getItem("token");
   const decodedToken = jwtDecode(token);
@@ -24,8 +26,8 @@ const Home = () => {
   useEffect(() => {
     dispatch(getAllProduits());
     dispatch(getAllSondages());
+    dispatch(getAllUsers());
   }, [dispatch]);
-
   useEffect(() => {
     // Vérifier si le pop-up a déjà été affiché pour le sondage
     const sondagePopupShown = localStorage.getItem("sondagePopupShown");

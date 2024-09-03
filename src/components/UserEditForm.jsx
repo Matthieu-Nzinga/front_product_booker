@@ -6,11 +6,15 @@ import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllUsers, updateUser } from "../features/users/userSlice";
 import { toast } from "react-toastify";
+import { jwtDecode } from "jwt-decode"; 
 
 const UserEditForm = ({ userData, onClose }) => {
     const dispatch = useDispatch();
     const { user } = useSelector((state) => state.users);
     const currentUser = user?.find(user => user.id === userData.id);
+    const token = localStorage.getItem("token");
+    const decodedToken = token ? jwtDecode(token) : null;
+    const isClient = decodedToken?.role === "Client";
     const { register, handleSubmit, formState: { errors }, watch } = useForm({
         defaultValues: {
             ...currentUser || userData,
@@ -57,6 +61,7 @@ const UserEditForm = ({ userData, onClose }) => {
                 error={!!errors.first_name}
                 helperText={errors.first_name?.message}
                 fullWidth
+                disabled={isClient}
             />
             <TextField
                 label="Nom"
@@ -67,6 +72,7 @@ const UserEditForm = ({ userData, onClose }) => {
                 error={!!errors.name}
                 helperText={errors.name?.message}
                 fullWidth
+                disabled={isClient}
             />
             <TextField
                 label="Email"
@@ -75,6 +81,7 @@ const UserEditForm = ({ userData, onClose }) => {
                 error={!!errors.email}
                 helperText={errors.email?.message}
                 fullWidth
+                disabled={isClient}
             />
             <TextField
                 label="Téléphone"
@@ -82,6 +89,7 @@ const UserEditForm = ({ userData, onClose }) => {
                 error={!!errors.phone}
                 helperText={errors.phone?.message}
                 fullWidth
+                disabled={isClient}
             />
             <TextField
                 label="Numéro de compte"
@@ -89,6 +97,7 @@ const UserEditForm = ({ userData, onClose }) => {
                 error={!!errors.account_number}
                 helperText={errors.account_number?.message}
                 fullWidth
+                disabled={isClient}
             />
             <TextField
                 select
@@ -98,6 +107,7 @@ const UserEditForm = ({ userData, onClose }) => {
                 error={!!errors.role}
                 helperText={errors.role?.message}
                 fullWidth
+                disabled={isClient}
             >
                 <MenuItem value="Admin">Admin</MenuItem>
                 <MenuItem value="Client">Client</MenuItem>
