@@ -1,24 +1,32 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PiUserCircleLight } from "react-icons/pi";
 import { NavLink, useNavigate } from "react-router-dom";
 import { FiMenu } from "react-icons/fi";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { removeToken } from "../features/authUtils";
 import { removeTokenAction } from "../features/auth/authSlice";
-import logoImg from '../../public/logo.png';
 import SondageForm from "./SondageForm";
 import Modal from "@mui/material/Modal";
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
+import { IconButton, useMediaQuery } from "@mui/material";
+import UserEditForm from "./UserEditForm";
+import CloseIcon from "@mui/icons-material/Close";
+import { jwtDecode } from "jwt-decode"; // Correction ici : jwtDecode importé correctement
 
 const NavBar = () => {
   const [image] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false); // État de la modal
+  const [isModalOpen, setIsModalOpen] = useState(false); // État pour le modal Sondage
+  const [editOpen, setEditOpen] = useState(false); // État pour le modal de profil
+  const [selectedUser, setSelectedUser] = useState(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const token = localStorage.getItem("token");
+  const decodedToken = token ? jwtDecode(token) : null;
+  const userId = decodedToken ? decodedToken.id : null;
+  const { user } = useSelector((state) => state.users);
+  const isMobile = useMediaQuery("(max-width: 640px)");
 
   const handleLogout = () => {
     removeToken();
@@ -26,6 +34,16 @@ const NavBar = () => {
     navigate('/');
   };
 
+  useEffect(() => {
+    if (user?.length > 0 && userId) {
+      setSelectedUser(user.find(u => u.id === userId));
+    }
+  }, [dispatch, user, userId]);
+
+  const handleOpenProfileModal = () => {
+    setIsDropdownOpen(false); // Ferme le menu déroulant
+    setEditOpen(true); // Ouvre le modal de profil
+  };
   const linkStyle = ({ isActive }) => ({
     color: isActive ? 'primary.main' : 'text.primary',
     textDecoration: 'none',
@@ -41,7 +59,6 @@ const NavBar = () => {
       </div>
 
       <nav className="flex items-center justify-between md:w-full">
-
         <ul className="hidden md:flex items-center gap-5 font-semibold text-base">
           <li>
             <NavLink to="" style={linkStyle}>Produits</NavLink>
@@ -80,8 +97,13 @@ const NavBar = () => {
           </div>
 
           {isDropdownOpen && (
-            <div className="absolute right-0 top-full mt-2 w-48 bg-white shadow-lg rounded-md py-2 ">
-              <NavLink to="/profil" className="block px-4 py-2 hover:bg-gray-100">Profil</NavLink>
+            <div className="absolute right-0 top-full mt-2 w-48 bg-white shadow-lg rounded-md py-2">
+              <button
+                onClick={handleOpenProfileModal}
+                className="block px-4 py-2 w-full text-left hover:bg-gray-100"
+              >
+                Profil
+              </button>
               <button
                 onClick={handleLogout}
                 className="block px-4 py-2 w-full text-left hover:bg-gray-100"
@@ -135,18 +157,45 @@ const NavBar = () => {
             left: "50%",
             transform: "translate(-50%, -50%)",
             width: { xs: '90%', sm: 400 },
-            maxHeight: "80vh", // Limite la hauteur maximale du modal à 80% de la hauteur de la vue
+            maxHeight: "80vh",
             bgcolor: "background.paper",
             borderRadius: 2,
             boxShadow: 24,
             p: 4,
-            overflowY: 'auto', // Active le scroll vertical si le contenu dépasse la hauteur maximale
+            overflowY: 'auto',
           }}
         >
           <SondageForm handleClose={() => setIsModalOpen(false)} title="Votre suggestion" />
         </Box>
       </Modal>
 
+      {/* Modal pour le profil */}
+      <Modal open={editOpen} onClose={() => setEditOpen(false)}>
+        <Box
+          className={`absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%] ${isMobile ? 'w-[90vw]' : 'w-[400px]'
+            } bg-white p-4 rounded-lg`}
+          sx={{
+            maxHeight: '90vh',
+            overflowY: 'auto',
+          }}
+        >
+          <div className="flex justify-end">
+            <IconButton onClick={() => setEditOpen(false)}>
+              <CloseIcon />
+            </IconButton>
+          </div>
+          {selectedUser && (
+            <UserEditForm
+              userData={selectedUser}
+              onSubmit={(data) => {
+                // Gérer la mise à jour de l'utilisateur ici (dispatch une action)
+                setEditOpen(false); // Fermer le modal après la mise à jour
+              }}
+              onClose={() => setEditOpen(false)}
+            />
+          )}
+        </Box>
+      </Modal>
     </div>
   );
 };
