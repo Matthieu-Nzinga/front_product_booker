@@ -106,7 +106,7 @@ const LoginForm = () => {
 
           <span className="text-xs sm:text-sm md:text-base flex justify-between items-center mt-2">
             Mot de passe oublié ?{" "}
-            <Link className="text-customBlue font-semibold">Réinitialisez</Link>
+            <Link to="/reset-password" className="text-customBlue font-semibold">Réinitialisez</Link>
           </span>
 
           <button
