@@ -1,6 +1,6 @@
-// export const API_URL = 'https://find-document-backend.onrender.com/api/'
-export const API_URL = 'https://product-booker.onrender.com/api/'
+//export const API_URL = 'https://product-booker.onrender.com/api/'
 
+export const API_URL = 'http://37.60.224.77/api/';
 export const LOGIN = API_URL + 'user/login'
 export const RESET_PASSWORD = API_URL + 'user/resetPassword'
 export const PRODUCTS = API_URL + 'products'

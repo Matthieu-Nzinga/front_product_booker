@@ -218,9 +218,8 @@ const Dashboard = () => {
         />
         <Modal open={open} onClose={handleCloseModal}>
           <Box
-            className={`absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%] bg-white p-4 rounded-lg shadow-lg ${
-              isMobile ? "w-[90vw]" : "w-[400px]"
-            }`}
+            className={`absolute top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%] bg-white p-4 rounded-lg shadow-lg ${isMobile ? "w-[90vw]" : "w-[400px]"
+              }`}
             sx={{
               maxHeight: isMobile ? "80vh" : "80vh",
               overflowY: "auto",
@@ -289,34 +288,44 @@ const Dashboard = () => {
                     >
                       Cette commande a déjà été livrée
                     </Typography>
-                  ) : (
-                    <FormControl fullWidth>
-                      <InputLabel id="status-select-label">Statut</InputLabel>
-                      <Select
-                        labelId="status-select-label"
-                        value={status}
-                        onChange={handleStatusChange}
+                  ) :
+                    selectedCommand.status === "Annulé" ? (
+                      <Typography
+                        variant="subtitle1"
+                        className="text-lg font-medium"
                       >
-                        <MenuItem value="En cours">En cours</MenuItem>
-                        <MenuItem value="Livré">Livré</MenuItem>
-                      </Select>
-                    </FormControl>
-                  )}
+                        Cette commande a été annulée
+                      </Typography>) :
+                      (
+                        <FormControl fullWidth>
+                          <InputLabel id="status-select-label">Statut</InputLabel>
+                          <Select
+                            labelId="status-select-label"
+                            value={status}
+                            onChange={handleStatusChange}
+                          >
+                            <MenuItem value="En attente">En attente</MenuItem>
+                            <MenuItem value="En cours">En cours</MenuItem>
+                            <MenuItem value="Livré">Livré</MenuItem>
+                          </Select>
+                        </FormControl>
+                      )}
                 </div>
 
-                {selectedCommand.status !== "Livré" && (
-                  <div className="mt-6">
-                    <Button
-                      onClick={handleUpdateStatus}
-                      variant="contained"
-                      color="primary"
-                      className="mt-4 w-full"
-                      disabled={isUpdating}
-                    >
-                      {isUpdating ? "Modification en cours..." : "Modifier"}
-                    </Button>
-                  </div>
-                )}
+                {selectedCommand.status !== "Livré" &&
+                  selectedCommand.status !== "Annulé" && (
+                    <div className="mt-6">
+                      <Button
+                        onClick={handleUpdateStatus}
+                        variant="contained"
+                        color="primary"
+                        className="mt-4 w-full"
+                        disabled={isUpdating}
+                      >
+                        {isUpdating ? "Modification en cours..." : "Modifier"}
+                      </Button>
+                    </div>
+                  )}
               </div>
             )}
           </Box>
