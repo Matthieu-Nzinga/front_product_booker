@@ -74,7 +74,7 @@ const LoginForm = () => {
           </h1>
         </div>
         <h2 className="font-black text-lg sm:text-xl md:text-2xl text-center mb-2">Bienvenue !</h2>
-        <p className="text-customGray font-normal text-xs sm:text-sm md:text-base text-center mb-4">
+        <p className=" font-black  text-xs sm:text-sm md:text-base text-center mb-4">
           Connectez-vous pour avoir accès à l’application
         </p>
         <form

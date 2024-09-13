@@ -132,7 +132,7 @@ const SondageDetailsModal = ({ sondage, open, onClose, users }) => {
           <CloseIcon />
         </IconButton>
         {/* Affichage du nombre de réponses et de la répartition */}
-        {sondage.reponses && sondage.reponses.length > 0 && (
+        { userRole == "Admin" && (sondage.reponses && sondage.reponses.length > 0 && (
           <div>
             <p>
               Pour ce produit, il y a {totalResponses} personne(s) qui ont répondu
@@ -155,7 +155,7 @@ const SondageDetailsModal = ({ sondage, open, onClose, users }) => {
               </ul>
             </p>
           </div>
-        )}
+        ))}
         {sondage.user.role === "Client" ? (
           <h2>
             C'est un produit suggéré par {sondage.user.first_name} {sondage.user.name}
@@ -187,7 +187,7 @@ const SondageDetailsModal = ({ sondage, open, onClose, users }) => {
             disabled={loading}
             sx={{ marginTop: 2 }}
           >
-            {loading ? "Enregistrement en cours..." : "Sauvegarder"}
+            {loading ? "Envoi en cours..." : "Envoyer votre reponse"}
           </Button>
         )}
 
