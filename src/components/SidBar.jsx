@@ -12,9 +12,12 @@ import { RiSurveyLine } from "react-icons/ri";
 import { Accordion, AccordionDetails, AccordionSummary } from "@mui/material";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { setFilteredRole } from "../features/products/products";
+import { jwtDecode } from "jwt-decode";
 
 const SidBar = () => {
   const [activeLink, setActiveLink] = useState(""); // État pour gérer le lien actif
+  const token = localStorage.getItem("token");
+  const decodedToken = jwtDecode(token);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -36,9 +39,10 @@ const SidBar = () => {
   };
 
   return (
-    <div className="w-[20%] h-screen bg-custom-gradient text-black px-6 py-8 text-base font-normal flex flex-col justify-between fixed">
+    <div className="w-[20%] h-screen bg-custom-gradient text-black px-6 py-8 text-base font-normal flex flex-col justify-between fixed overflow-y-auto">
       <div className="flex flex-col gap-12">
         <img src={logoImg} alt="Logo" className='mb-4 h-20 w-20 mx-auto' />
+        <span>Bienvenue <strong>{decodedToken.first_name} {decodedToken.name}</strong></span>
         <nav>
           <ul className="flex flex-col">
             <NavLink
@@ -114,7 +118,7 @@ const SidBar = () => {
                     >
                       Suggestions des clients
                     </li>
-                 </NavLink>
+                  </NavLink>
                   <NavLink to="/sondage">
                     <li
                       className={`cursor-pointer p-2 rounded-xl ${activeLink === "admin" ? "bg-customBlue text-white" : "hover:bg-customBlue"}`}
@@ -122,7 +126,7 @@ const SidBar = () => {
                     >
                       Vos sondages
                     </li>
-                 </NavLink>
+                  </NavLink>
                 </ul>
               </AccordionDetails>
             </Accordion>
@@ -134,13 +138,14 @@ const SidBar = () => {
               }
             >
               <li className="flex items-center gap-2 p-3">
-                <IoIosLogOut size={25} />   Se déconnecter
+                <IoIosLogOut size={25} /> Se déconnecter
               </li>
             </button>
           </ul>
         </nav>
       </div>
     </div>
+
   );
 };
 

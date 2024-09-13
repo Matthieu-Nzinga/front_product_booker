@@ -125,7 +125,7 @@ const SondageForm = ({ handleClose, title }) => {
         fullWidth
         variant="outlined"
         margin="normal"
-        label="A quel prix aimeriez-vous acheter ce produit?"
+        label="A quel prix aimeriez-vous acheter ce produit?(Euro)"
         type="text"
         {...register("prix", {
           required: "Prix est requis",

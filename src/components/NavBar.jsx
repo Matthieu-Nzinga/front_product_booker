@@ -47,7 +47,7 @@ const NavBar = () => {
   const linkStyle = ({ isActive }) => ({
     color: isActive ? 'primary.main' : 'text.primary',
     textDecoration: 'none',
-    fontWeight: isActive ? 'bold' : 'normal',
+    fontWeight: isActive ? 'bold' : 'bold',
   });
 
   return (
@@ -59,9 +59,9 @@ const NavBar = () => {
       </div>
 
       <nav className="flex items-center justify-between md:w-full">
-        <ul className="hidden md:flex items-center gap-5 font-semibold text-base">
+        <ul className="  hidden md:flex items-center gap-5 font-semibold text-base">
           <li>
-            <NavLink to="" style={linkStyle}>Produits</NavLink>
+            <NavLink  to="" style={linkStyle}>Produits</NavLink>
           </li>
           <li>
             <NavLink to="panier" style={linkStyle}>Mon panier</NavLink>
@@ -156,7 +156,7 @@ const NavBar = () => {
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: { xs: '90%', sm: 400 },
+            width: { xs: '100%', sm: 400 },
             maxHeight: "80vh",
             bgcolor: "background.paper",
             borderRadius: 2,
